@@ -2,6 +2,7 @@
 import '../styles/base.css';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import { gridTokens } from '../lib/grid';
 import { inkTokens } from '../lib/ink';
 import type { NavKey } from '../lib/nav';
 
@@ -25,8 +26,9 @@ const documentTitle = footer ? `${title} — Penko Skumov` : title;
     <title>{documentTitle}</title>
     <link rel="preload" href="/fonts/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Satoshi-Medium.woff2" as="font" type="font/woff2" crossorigin />
-    {/* Vertical ink offsets, measured from Satoshi's own metrics at build. */}
-    <style set:html={inkTokens()}></style>
+    {/* Generated at build: the grid tiers, and the vertical ink offsets
+        measured from Satoshi's own metrics. Both live in src/lib. */}
+    <style set:html={gridTokens() + inkTokens()}></style>
   </head>
   <body>
     <Header current={current}>

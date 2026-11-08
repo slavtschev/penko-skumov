@@ -41,8 +41,11 @@ menu words, Close, and that the Home carries no footer.
 hamburger and menu sheet) and the footer, plus placeholder pages for
 Projects, About and Contact so the header links work.
 
-**Step 2** -- the content collections and the import that fills them. The
-real pages arrive at steps 4 onwards.
+**Step 2** -- the content collections and the import that fills them.
+
+**Step 3** -- the image component. The real pages arrive at steps 4 onwards,
+so nothing renders a photograph yet; `Frame.astro` is exercised for the
+first time by the series grid at step 5.
 
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted
@@ -53,11 +56,13 @@ src/styles/
 src/lib/
   satoshi-metrics.json   generated: cap height, ascent, side bearings
   ink.ts                 cap-top, baseline and side-bearing arithmetic
+  grid.ts                the tier table: CSS tokens AND every `sizes`
+  photographs.ts         source/images as Astro image assets
   nav.ts                 Projects, About, Contact
 src/content.config.ts   the series, frames and home schemas
 src/content/           generated: series/*.json, frames.json, home.json
 src/layouts/Page.astro
-src/components/        Header.astro, Footer.astro
+src/components/        Header.astro, Footer.astro, Frame.astro
 src/pages/             index, projects, about, contact
 ```
 
@@ -151,3 +156,39 @@ top of `import-webflow.mjs`):
   which disagree with themselves ("Days at sea", "2018 - 2020");
 * `07_Saint.jpg` is really `07_Saints.jpg` -- the old reference 404s;
 * the Archive's Lith Prints thumbnail points at a `.jpg.png` that 404s.
+
+## Photographs
+
+`Frame.astro` takes a frame from the content and a column span:
+
+```astro
+<Frame file={f.data.file} width={f.data.width} height={f.data.height}
+       alt={f.data.alt} span={4} column={i} />
+```
+
+AVIF with WebP and a JPEG fallback, at the widths in `WIDTH_LADDER` that
+the source can actually fill -- upscaling a 1600px scan to 3200 adds bytes
+and no detail. When Penko's originals arrive the upper rungs start being
+used with no change here.
+
+`sizes` is computed from the module and the tier, never `100vw`: a
+nine-column plate is 1015 of 1440px, so `100vw` would fetch a file 40%
+wider than the frame can show. `span` is the column count; `spans` takes
+per-tier overrides for the modules the handoff narrows on the way down.
+
+The box is the photograph's own proportion snapped **down** to a whole
+pixel, which is the "integer-box rounding (0.45% on a 3:2 landscape)" the
+handoff allows; `object-fit: cover` spends it, half a pixel at each edge.
+Pass `boxHeight` where the layout fixes one instead.
+
+Opacity cascades as a custom property rather than through competing
+selectors -- `.frame.in` would otherwise outrank `:hover` and the frame
+would never dim.
+
+### Build weight
+
+Astro emits each photograph's original next to the variants it makes from
+it, and nothing links to them: 123MB of the first 133MB build. The `prune`
+integration in `astro.config.mjs` deletes any asset whose name appears
+nowhere in the built HTML, CSS or JS, which brought that build to 10MB. It
+reports what it removed on every build.

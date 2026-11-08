@@ -8,11 +8,13 @@
  * skip this script -- point import-webflow.mjs at the export folder, which
  * has the same page names and an images/ folder.
  *
- * Photographs are not downloaded. The import only needs each one's
- * intrinsic size, so this reads the JPEG header over a range request --
- * a couple of KB per file instead of ~200MB of photographs.
+ * By default the photographs are not downloaded: the import only needs
+ * each one's intrinsic size, so this reads the JPEG header over a range
+ * request, a couple of KB per file. Pass --images to fetch the files
+ * themselves as well, which the image component needs to make its AVIF
+ * and WebP from. They land in source/images/ and are not committed.
  *
- *   node scripts/fetch-source.mjs
+ *   node scripts/fetch-source.mjs [--images]
  *
  * Behind an HTTP proxy (a cloud session is), let Node see it:
  *   NODE_USE_ENV_PROXY=1 node scripts/fetch-source.mjs
@@ -102,3 +104,19 @@ for (const file of [...files].sort()) {
 const sorted = Object.fromEntries(Object.entries(cache).sort(([a], [b]) => a.localeCompare(b)));
 await writeFile(cachePath, JSON.stringify(sorted, null, 1) + '\n');
 console.log(`\n${PAGES.length} pages, ${Object.keys(cache).length} photographs sized (${read} newly read)`);
+
+/* ---- the photographs themselves, for the image pipeline --------------- */
+if (process.argv.includes('--images')) {
+  await mkdir(join(OUT, 'images'), { recursive: true });
+  let got = 0;
+  let had = 0;
+  for (const file of [...files].sort()) {
+    const target = join(OUT, 'images', file);
+    if (existsSync(target)) { had++; continue; }
+    const res = await get(`${ORIGIN}/images/${encodeURIComponent(file)}`);
+    if (!res) { console.warn(`  missing  images/${file}`); continue; }
+    await writeFile(target, Buffer.from(await res.arrayBuffer()));
+    if (++got % 25 === 0) console.log(`  images   ${got} fetched`);
+  }
+  console.log(`${got} photographs fetched, ${had} already here`);
+}

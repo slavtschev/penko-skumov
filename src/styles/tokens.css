@@ -55,45 +55,15 @@
   --caption-gap: 8px;
   --row-gap: 24px;
 
-  /* --- grid. XS is the base tier; each tier is fluid columns with a
-         fixed margin and gutter. No maximum container width. --- */
-  --cols: 4;
-  --margin: 20px;
-  --gutter: 12px;
-}
+  /* --- grid ---------------------------------------------------------
+     The tier values are NOT here: --cols, --margin and --gutter are
+     emitted from src/lib/grid.ts, which is also where every photograph's
+     `sizes` is computed. One table, so the two cannot disagree.
 
-/* S */
-@media (min-width: 768px) {
-  :root {
-    --cols: 8;
-    --margin: 28px;
-    --gutter: 16px;
-  }
-}
-
-/* M */
-@media (min-width: 1024px) {
-  :root {
-    --cols: 12;
-    --margin: 32px;
-    --gutter: 16px;
-  }
-}
-
-/* L -- the tier the boards are drawn at (1440: column 95, gutter 20) */
-@media (min-width: 1280px) {
-  :root {
-    --cols: 12;
-    --margin: 40px;
-    --gutter: 20px;
-  }
-}
-
-/* XL */
-@media (min-width: 1680px) {
-  :root {
-    --cols: 12;
-    --margin: 56px;
-    --gutter: 24px;
-  }
+       XL  1680+      12 col  margin 56  gutter 24
+       L   1280-1679  12 col  margin 40  gutter 20   <- the boards
+       M   1024-1279  12 col  margin 32  gutter 16
+       S   768-1023    8 col  margin 28  gutter 16
+       XS  <768        4 col  margin 20  gutter 12
+  */
 }

@@ -1,0 +1,182 @@
+---
+import { Picture } from 'astro:assets';
+import { sizesFor, widthsFor } from '../lib/grid';
+import { photograph } from '../lib/photographs';
+
+interface Props {
+  /** file name inside source/images, as the content collections hold it */
+  file: string;
+  /** the photograph's own proportions, from the content */
+  width: number;
+  height: number;
+  /** short and literal; null until Penko writes it, which renders as decorative */
+  alt?: string | null;
+  /** how many columns the frame occupies, for `sizes` */
+  span: number;
+  /** per-tier overrides, for modules the handoff narrows on the way down */
+  spans?: Partial<Record<string, number>>;
+  /**
+   * An explicit box height, where the layout fixes one (the boards draw the
+   * series grid at 440 x 292). Left out, the frame takes the photograph's
+   * own proportion, snapped down to a whole pixel.
+   */
+  boxHeight?: string;
+  /** its column in the row: the load dissolve goes 150ms apart across one */
+  column?: number;
+  /** the first photograph on the Home is eager and high priority; the rest are not */
+  priority?: boolean;
+  class?: string;
+}
+
+const {
+  file,
+  width,
+  height,
+  alt = null,
+  span,
+  spans = {},
+  boxHeight,
+  column = 0,
+  priority = false,
+  class: className,
+} = Astro.props;
+
+const src = await photograph(file);
+if (!src) {
+  throw new Error(
+    `No photograph on disk for "${file}". Run: npm run source:images`,
+  );
+}
+---
+
+{/*
+  Natural proportions, never cropped. width and height are reserved from the
+  content so the page does not move as photographs arrive, and the box shows
+  the placeholder grey until this one has decoded, then dissolves it in over
+  1000ms -- 150ms later for each column across a row.
+*/}
+<div
+  class:list={['frame', className]}
+  style={[
+    `--ratio: ${+(width / height).toFixed(6)}`,
+    `--column: ${column}`,
+    boxHeight && `--box-height: ${boxHeight}`,
+  ]
+    .filter(Boolean)
+    .join('; ')}>
+  <div class="box">
+    <Picture
+      src={src}
+      formats={['avif', 'webp']}
+      fallbackFormat="jpeg"
+      widths={widthsFor(src.width)}
+      sizes={sizesFor(span, spans)}
+      alt={alt ?? ''}
+      width={width}
+      height={height}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding={priority ? 'sync' : 'async'}
+      fetchpriority={priority ? 'high' : 'auto'}
+    />
+  </div>
+</div>
+
+<style>
+  /*
+    The box keeps the photograph's own proportion, snapped DOWN to a whole
+    pixel -- "frames sit on integer pixels", and the handoff allows exactly
+    the crop that costs: "the integer-box rounding (0.45% on a 3:2
+    landscape)", which object-fit: cover spends half a pixel at each edge.
+    aspect-ratio is the fallback where round() is missing: the same box to
+    within a pixel, just a fractional one.
+
+    The frame is the container and .box reads its width, because an element
+    cannot query a container it declares itself.
+  */
+  .frame {
+    display: block;
+    width: 100%;
+    container-type: inline-size;
+
+    /* opacity, and how it changes, cascade as properties rather than as
+       competing selectors: .frame.in would otherwise outrank :hover on
+       specificity and the frame would never dim. */
+    --frame-opacity: 0;
+    --frame-dissolve: var(--dissolve-load);
+    --frame-delay: calc(var(--column, 0) * 150ms);
+  }
+
+  /* set once the photograph has decoded, not once the element exists */
+  .frame.in {
+    --frame-opacity: 1;
+  }
+
+  /* pointer devices only: the frame to 80%, over 300ms */
+  @media (hover: hover) and (pointer: fine) {
+    .frame.in:hover {
+      --frame-opacity: 0.8;
+      --frame-dissolve: var(--dissolve-out);
+      --frame-delay: 0ms;
+    }
+  }
+
+  /* keyboard focus does the same, on any device */
+  :where(a, button):focus-visible .frame.in {
+    --frame-opacity: 0.8;
+    --frame-dissolve: var(--dissolve-out);
+    --frame-delay: 0ms;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame {
+      --frame-delay: 0ms;
+    }
+  }
+
+  .box {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: var(--ratio);
+    background: var(--placeholder);
+    overflow: hidden;
+  }
+
+  @supports (height: round(down, 1.5px, 1px)) {
+    .box {
+      aspect-ratio: auto;
+      height: var(--box-height, round(down, calc(100cqw / var(--ratio)), 1px));
+    }
+  }
+
+  .box :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: var(--frame-opacity);
+    transition: opacity var(--frame-dissolve) var(--timing) var(--frame-delay);
+  }
+</style>
+
+<script>
+  /**
+   * Dissolve each photograph in when it has decoded. A cached image can be
+   * complete before this runs, so check that first; `decode()` resolves
+   * once the pixels are ready to paint, which `load` alone does not promise.
+   */
+  const reveal = (frame: Element) => frame.classList.add('in');
+
+  for (const frame of document.querySelectorAll<HTMLElement>('.frame')) {
+    const img = frame.querySelector('img');
+    if (!img) continue;
+    if (img.complete && img.naturalWidth > 0) {
+      reveal(frame);
+      continue;
+    }
+    img
+      .decode()
+      .then(() => reveal(frame))
+      .catch(() => reveal(frame)); // a broken photograph should not stay invisible
+  }
+</script>
