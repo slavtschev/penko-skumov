@@ -84,7 +84,8 @@ const about = defineCollection({
       })
       .nullable(),
     bio: z.array(z.string()),
-    affiliations: z.array(z.string()),
+    /** restricted HTML: anchors only, everything else escaped */
+    affiliations: z.array(z.object({ years: z.string().nullable(), html: z.string() })),
     /** one entry per year, newest handling left to the page */
     exhibitions: z.array(z.object({ year: z.string(), entries: z.array(z.string()) })),
     publications: z.array(z.object({ year: z.string(), entries: z.array(z.string()) })),
@@ -103,7 +104,14 @@ const contact = defineCollection({
     instagram: z.string().nullable(),
     facebook: z.string().nullable(),
     /** the prints on the wall; sizes are placeholders until Penko confirms */
-    prints: z.array(z.object({ series: z.string(), size: z.string().nullable() })),
+    prints: z.array(
+      z.object({
+        series: z.string(),
+        size: z.string().nullable(),
+        /** the board's sizes are placeholders; Penko has to confirm */
+        sizeConfirmed: z.boolean(),
+      }),
+    ),
   }),
 });
 

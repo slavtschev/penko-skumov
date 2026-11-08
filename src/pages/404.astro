@@ -1,0 +1,84 @@
+---
+import Page from '../layouts/Page.astro';
+import { inkLeft } from '../lib/ink';
+
+/* D4-404 / D4-Phone-404: a title, one sentence, two links. */
+
+const TITLE = 'Page not found';
+const SENTENCE = 'The page you are looking for doesn’t exist or has been moved';
+
+const links = [
+  { label: 'Home', href: '/' },
+  { label: 'Projects', href: '/projects/' },
+].map((l) => ({ ...l, ink: inkLeft(l.label, 'ui') }));
+
+const titleInk = inkLeft(TITLE, 'title');
+const sentenceInk = inkLeft(SENTENCE, 'text');
+
+---
+
+<Page title={TITLE} footer={true}>
+  <div class="grid">
+    <h1 class="t-title ink-top span-4 start-1" style={`margin-left: -${titleInk}px`}>
+      {TITLE}
+    </h1>
+
+    {/* The sentence's cap-top sits on 64 too, level with the title's. The
+        offset lives in the stylesheet, not inline, so the phone can
+        override it -- an inline margin would win over the media query. */}
+    <div class="aside span-4 start-5">
+      <p class="t-text" style={`margin-left: -${sentenceInk}px`}>{SENTENCE}</p>
+      <ul class="links t-ui">
+        {
+          links.map((l) => (
+            <li>
+              <a class="u" href={l.href} style={`margin-left: -${l.ink}px; --ul-l: ${l.ink}px`}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+</Page>
+
+<style>
+  h1 {
+    white-space: nowrap;
+  }
+
+  .aside {
+    margin-top: calc(-1 * var(--cap-int-text));
+  }
+
+  .links {
+    /* the sentence runs to 84 on the board, the first link's box to 146 */
+    margin-top: 34px;
+  }
+
+  .links li + li {
+    margin-top: 8px;
+  }
+
+  .links a {
+    display: inline-block;
+  }
+
+  /* Phone: one column, the sentence under the title. */
+  @media (max-width: 767px) {
+    h1,
+    .aside {
+      grid-column: 1 / -1;
+    }
+
+    .aside {
+      /* title box 58..90; the sentence's box starts at 112 */
+      margin-top: 22px;
+    }
+
+    .links {
+      margin-top: 34px;
+    }
+  }
+</style>

@@ -1,14 +1,221 @@
 ---
+import { getEntry } from 'astro:content';
+import Frame from '../components/Frame.astro';
 import Page from '../layouts/Page.astro';
 import { inkLeft } from '../lib/ink';
 
-const title = 'About';
-const ink = inkLeft(title, 'title');
+/* D4-About: the portrait, its caption and the affiliations in columns 1-4;
+   the title and bio in 5-8; the quotation in 9-12. Then Exhibitions and
+   Awards across 1-8 with the year in column 1, and Publications in 9-12. */
+
+const aboutEntry = await getEntry('about', 'about');
+const about = aboutEntry!.data;
+const homeEntry = await getEntry('home', 'home');
+const quotation = homeEntry!.data.quotation;
+
+const TITLE = 'About';
+const PORTRAIT_CAPTION = 'Penko Skumov';
+
+const exhibitionsLabel = 'Exhibitions and awards, 2000–2025';
+const publicationsLabel = 'Publications, 2005–2024';
+
+/* Each year group prints its year once, on its first entry. */
+const rowsOf = (groups: { year: string; entries: string[] }[]) =>
+  groups.flatMap((g) => g.entries.map((html, i) => ({ year: i === 0 ? g.year : '', html })));
+
+const exhibitions = rowsOf(about.exhibitions);
+const publications = rowsOf(about.publications);
 ---
 
-<Page title={title} current="about">
-  <h1 class="t-title ink-top" style={`margin-left: -${ink}px`}>{title}</h1>
-  <p class="t-caption" style="margin-top: var(--row-gap)">
-    Placeholder. The About page arrives at build step 4.
-  </p>
+<Page title={TITLE} current="about">
+  <div class="grid about">
+    <div class="portrait span-4 start-1">
+      {
+        about.portrait && (
+          <Frame
+            file={about.portrait.file}
+            width={about.portrait.width}
+            height={about.portrait.height}
+            alt={`Penko Skumov`}
+            span={4}
+            priority={true}
+          />
+        )
+      }
+      <p class="t-caption portrait-caption" style={`margin-left: -${inkLeft(PORTRAIT_CAPTION, 'caption')}px`}>
+        {PORTRAIT_CAPTION}
+      </p>
+
+      <dl class="pairs affiliations">
+        {
+          about.affiliations.map((a) => (
+            <div class="pair">
+              <dt class="t-caption year">{a.years}</dt>
+              <dd class="t-ui entry" set:html={a.html} />
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+
+    <div class="intro span-4 start-5">
+      <h1 class="t-title ink-top" style={`margin-left: -${inkLeft(TITLE, 'title')}px`}>{TITLE}</h1>
+      {about.bio.map((p) => <p class="t-text bio">{p}</p>)}
+    </div>
+
+    <blockquote class="quotation t-text span-4 start-9">{quotation}</blockquote>
+
+    <h2 class="t-caption label span-8 start-1" style={`margin-left: -${inkLeft(exhibitionsLabel, 'caption')}px`}>
+      {exhibitionsLabel}
+    </h2>
+    <h2 class="t-caption label span-4 start-9" style={`margin-left: -${inkLeft(publicationsLabel, 'caption')}px`}>
+      {publicationsLabel}
+    </h2>
+
+    <dl class="pairs list span-8 start-1">
+      {
+        exhibitions.map((r) => (
+          <div class="pair">
+            <dt class="t-caption year">{r.year}</dt>
+            <dd class="t-ui entry" set:html={r.html} />
+          </div>
+        ))
+      }
+    </dl>
+
+    <dl class="pairs list span-4 start-9">
+      {
+        publications.map((r) => (
+          <div class="pair">
+            <dt class="t-caption year">{r.year}</dt>
+            <dd class="t-ui entry" set:html={r.html} />
+          </div>
+        ))
+      }
+    </dl>
+  </div>
 </Page>
+
+<style>
+  .about {
+    row-gap: 0;
+    align-items: start;
+  }
+
+  .portrait-caption {
+    margin-top: var(--caption-gap);
+  }
+
+  /* year in column 1 of the module, entry from column 2 on */
+  .pairs {
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: baseline;
+    row-gap: 12px;
+    margin: 0;
+  }
+
+  .pair {
+    display: contents;
+  }
+
+  .year {
+    grid-column: 1;
+    white-space: nowrap;
+  }
+
+  .entry {
+    grid-column: 2 / -1;
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* links inside an entry are underlined outright, not on hover: they are
+     inside running text, where a bare colour change would not show */
+  .entry :global(a) {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+  }
+
+  .portrait,
+  .intro {
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+
+  /* :global, because the Frame component's root carries its own scope
+     attribute and a plain child selector would not reach it */
+  .portrait > :global(*),
+  .intro > :global(*) {
+    grid-column: 1 / -1;
+  }
+
+  .affiliations {
+    grid-column: 1 / -1;
+    margin-top: 38px;
+  }
+
+  .bio {
+    margin-top: 22px;
+    text-wrap: pretty;
+  }
+
+  .quotation {
+    margin: 0;
+    margin-top: calc(-1 * var(--cap-int-text));
+    color: var(--grey);
+    text-wrap: pretty;
+  }
+
+  .label {
+    margin-top: 98px;
+    align-self: end;
+  }
+
+  .list {
+    margin-top: 19px;
+  }
+
+  /* Phone: one column. */
+  @media (max-width: 1023px) {
+    .about > * {
+      grid-column: 1 / -1;
+    }
+
+    .portrait,
+    .intro {
+      display: block;
+    }
+
+    .pairs {
+      display: block;
+    }
+
+    .pair {
+      display: block;
+      padding-bottom: 20px;
+    }
+
+    .year:empty {
+      display: none;
+    }
+
+    .year {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .intro {
+      margin-top: 44px;
+    }
+
+    .quotation {
+      margin-top: 44px;
+    }
+
+    .label {
+      margin-top: 60px;
+    }
+  }
+</style>

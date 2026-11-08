@@ -10,23 +10,43 @@
   "prints": [
    {
     "series": "days-at-sea",
-    "size": null
-   },
-   {
-    "series": "sense-of-freedom",
-    "size": null
-   },
-   {
-    "series": "the-festival",
-    "size": null
-   },
-   {
-    "series": "six-days-on-an-island",
-    "size": null
+    "size": "45 × 30 cm",
+    "sizeConfirmed": false
    },
    {
     "series": "vertical-summer",
-    "size": null
+    "size": "30 × 45 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "sense-of-freedom",
+    "size": "45 × 30 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "vertical-summer",
+    "size": "30 × 45 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "the-festival",
+    "size": "45 × 30 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "vertical-summer",
+    "size": "30 × 45 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "six-days-on-an-island",
+    "size": "45 × 30 cm",
+    "sizeConfirmed": false
+   },
+   {
+    "series": "vertical-summer",
+    "size": "30 × 45 cm",
+    "sizeConfirmed": false
    }
   ]
  }

@@ -31,9 +31,10 @@ npx playwright install chromium   # once
 npm run build && npm run verify
 ```
 
-Step 1 asserts 15 positions: the name, the nav's right edge, an ink-aligned
-h1, both footer lines at both tiers, the three hamburger rules, the three
-menu words, Close, and that the Home carries no footer.
+44 positions so far, across both tiers: the header and footer, the
+hamburger and the menu sheet, and every page from step 4. Where a board
+figure and the built one differ by a pixel or two the check asserts the
+built value and says why in a comment -- see decision 6 in CLAUDE.md.
 
 ## What is here (build steps 1 and 2)
 
@@ -43,9 +44,11 @@ Projects, About and Contact so the header links work.
 
 **Step 2** -- the content collections and the import that fills them.
 
-**Step 3** -- the image component. The real pages arrive at steps 4 onwards,
-so nothing renders a photograph yet; `Frame.astro` is exercised for the
-first time by the series grid at step 5.
+**Step 3** -- the image component.
+
+**Step 4** -- Projects, About, Contact and 404, the first pages that render
+the content. The Contact wall shows the first print still; its slideshow,
+and the Home, are step 7, and the series pages are step 5.
 
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted

@@ -7,13 +7,21 @@
    "credit": null
   },
   "bio": [
-   "I was born on October 19, 1978 in Burgas, Bulgaria. Grew up in the small town of Pomorie on the coast of the Black Sea. I studied art history and cultural studies at the New Bulgarian University in Sofia. Started taking photos actively and dedicatedly in 1998. In 1999 I became a co-founder and member of photo group Naos. From 2001 to 2009, the group organized and participated in numerous joint exhibitions. Since 2015, I have been working mainly in the genres of street and documentary photography as part of my own personal projects.",
-   "“The photographer’s wandering is a metaphor for the road as an adventure; it is a journey through which the wonders of the world are revealed. It is a metaphor for ordinary life – a life that we experience with our eyes wide open, looking for the extraordinary. Meandering the streets of the world, the photographer is a drifter who drinks up faces, gestures, light and shadow, and always encounters familiar places afresh. Nothing stays the same in the flow of time. In this sense, photography is a tool for unravelling the mysteries of the world and the spirit of the times. It is an \"armed eye\" that manages to see into the flash of the moment that there is something beyond banality, beyond nonsense and more than is visible to the \"naked eye.”"
+   "I was born on October 19, 1978 in Burgas, Bulgaria. Grew up in the small town of Pomorie on the coast of the Black Sea. I studied art history and cultural studies at the New Bulgarian University in Sofia. Started taking photos actively and dedicatedly in 1998. In 1999 I became a co-founder and member of photo group Naos. From 2001 to 2009, the group organized and participated in numerous joint exhibitions. Since 2015, I have been working mainly in the genres of street and documentary photography as part of my own personal projects."
   ],
   "affiliations": [
-   "Co-founder of photo group Naos (1999-2013)",
-   "Member of BULB Collective (Balkan Urban League without Borders) (2018 - 2022)",
-   "Co-founder and lecturer of Street Photo Lab (2019-)"
+   {
+    "years": "1999–2013",
+    "html": "Co-founder of <a href=\"http://naos-group.info\">photo group Naos</a>"
+   },
+   {
+    "years": "2018–2022",
+    "html": "Member of <a href=\"http://www.bulbphotos.eu/\">BULB Collective</a> (Balkan Urban League without Borders)"
+   },
+   {
+    "years": "2019–",
+    "html": "Co-founder and lecturer of <a href=\"https://www.facebook.com/StreetPhotoLab\">Street Photo Lab</a>"
+   }
   ],
   "exhibitions": [
    {
@@ -49,51 +57,51 @@
    {
     "year": "2005",
     "entries": [
-     "“Traveler&#x27;s Notes“ - Sixth exhibition of photo group Naos, Salt Museum, Pomorie"
+     "“Traveler's Notes“ - Sixth exhibition of photo group Naos, Salt Museum, Pomorie"
     ]
    },
    {
     "year": "2006",
     "entries": [
-     "“The city and its symbols: Spaces of the daily miracle\" – exhibition of photo group Naos, Sollers gallery, Sofia"
+     "“The city and its symbols: Spaces of the daily miracle&quot; – exhibition of photo group Naos, Sollers gallery, Sofia"
     ]
    },
    {
     "year": "2007",
     "entries": [
-     "\"The White Crystals of the Times\" - plein air for classic photography and joint exhibition dedicated to the 5th Anniversary of Salt Museum, Pomorie"
+     "&quot;The White Crystals of the Times&quot; - plein air for classic photography and joint exhibition dedicated to the 5th Anniversary of Salt Museum, Pomorie"
     ]
    },
    {
     "year": "2009",
     "entries": [
-     "\"Prints\" - Georgi Georgiev and young artists (alternative photographic processes) – Joint exhibition of photo group Naos and group \"Ratts of the Capital\", dedicated to G. Georgiev, Circle+ gallery, Sofia"
+     "&quot;Prints&quot; - Georgi Georgiev and young artists (alternative photographic processes) – Joint exhibition of photo group Naos and group &quot;Ratts of the Capital&quot;, dedicated to G. Georgiev, Circle+ gallery, Sofia"
     ]
    },
    {
     "year": "2010",
     "entries": [
-     "\"Photo Images\" – Joint exhibition with Arslan Akhmedov and Veneta Zaharieva in \"The Clock\", Sofia"
+     "&quot;Photo Images&quot; – Joint exhibition with Arslan Akhmedov and Veneta Zaharieva in &quot;The Clock&quot;, Sofia"
     ]
    },
    {
     "year": "2013",
     "entries": [
-     "\"Remembrance of...\" Joint exhibition (manual photographic techniques) of the Bulgarian Photographic Society – photographic still lifes by 18 authors, Vivacom Art Hall, Sofia"
+     "&quot;Remembrance of...&quot; Joint exhibition (manual photographic techniques) of the Bulgarian Photographic Society – photographic still lifes by 18 authors, Vivacom Art Hall, Sofia"
     ]
    },
    {
     "year": "2017",
     "entries": [
-     "Joint exhibition \"New Life Street - Entrance B\": an underground festival, Autonomy Factory, Sofia"
+     "Joint exhibition &quot;New Life Street - Entrance B&quot;: an underground festival, Autonomy Factory, Sofia"
     ]
    },
    {
     "year": "2018",
     "entries": [
-     "Exhibition \"The Photograph\",  Treyman Brothers Photo Studio, Sofia",
+     "Exhibition &quot;The Photograph&quot;,  Treyman Brothers Photo Studio, Sofia",
      "Phos Bucharest Street Photography Days 2018 (single photo contest) – Finalist",
-     "StreetHunters October 2018 Street Photography Contest, theme „Old & Young” – Winner",
+     "<a href=\"https://www.streethunters.net/\">StreetHunters</a> October 2018 Street Photography Contest, theme „Old &amp; Young” – Winner",
      "Phos Athens Street Photography Days 2018 (single photo contest) – Finalist",
      "Joint exhibition with Svilen Nachev and Martin Iliev (BULB Collective) at VIZUALIZATOR Festival, Belgrade, Serbia"
     ]
@@ -102,7 +110,7 @@
     "year": "2020",
     "entries": [
      "Photoacademica 2020 – Second Prize for art photography and diploma for photo reportage",
-     "Joint exhibition \"144 000 Minutes\", Monochrome Hub Gallery, Valencia, Spain",
+     "Joint exhibition &quot;144 000 Minutes&quot;, Monochrome Hub Gallery, Valencia, Spain",
      "Moment Street Photo Awards 2020 – Finalist",
      "BG Press Photo 2020 – Award for Outstanding Performance"
     ]
@@ -110,7 +118,7 @@
    {
     "year": "2021",
     "entries": [
-     "Joint exhibition \"Wander for a Wonder\" with Svilen Nachev, Monochrome Hub Gallery, Valencia, Spain",
+     "Joint exhibition &quot;Wander for a Wonder&quot; with Svilen Nachev, Monochrome Hub Gallery, Valencia, Spain",
      "Phodar Biennial – Finalist for series",
      "Photoacademica 2021 – Honorable mention"
     ]
@@ -124,7 +132,7 @@
    {
     "year": "2023",
     "entries": [
-     "First prize at the National Geographic Bulgaria photo contest in the \"People\" category"
+     "First prize at the National Geographic Bulgaria photo contest in the &quot;People&quot; category"
     ]
    },
    {
@@ -151,22 +159,22 @@
    {
     "year": "2010",
     "entries": [
-     "\"Through the eye of photography or the mystery of the world\", “Svet” magazine, issue 3 – “The deserts inside us”",
+     "&quot;Through the eye of photography or the mystery of the world&quot;, “Svet” magazine, issue 3 – “The deserts inside us”",
      "„Orthodoxy and postmodernism“, book, Omofor publishing house (book cover photo)",
-     "\"Christianity and Culture\" magazine, issue 53",
-     "\"Nation of hesychasts\" by Deyan Enev, book, Omofor publishing house (book cover photo)"
+     "&quot;Christianity and Culture&quot; magazine, issue 53",
+     "&quot;Nation of hesychasts&quot; by Deyan Enev, book, Omofor publishing house (book cover photo)"
     ]
    },
    {
     "year": "2012",
     "entries": [
-     "\"The human thing in the city\" - interview with photo group Naos \"Svet\" Magazine, issue 4"
+     "&quot;The human thing in the city&quot; - interview with photo group Naos &quot;Svet&quot; Magazine, issue 4"
     ]
    },
    {
     "year": "2016",
     "entries": [
-     "Christianity and Culture\" Magazine, issue 116"
+     "Christianity and Culture&quot; Magazine, issue 116"
     ]
    },
    {

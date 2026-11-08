@@ -51,7 +51,10 @@ const entities = (s) =>
     .replace(/&gt;/g, '>').replace(/&nbsp;| /g, ' ').replace(/&#39;|&apos;/g, "'")
     .replace(/&rsquo;/g, '’').replace(/&lsquo;/g, '‘')
     .replace(/&ldquo;/g, '“').replace(/&rdquo;/g, '”')
-    .replace(/&ndash;/g, '–').replace(/&mdash;/g, '—');
+    .replace(/&ndash;/g, '–').replace(/&mdash;/g, '—')
+    // numeric and hex entities: Webflow writes &#x27; for an apostrophe
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => String.fromCodePoint(Number(dec)));
 
 /** Tag soup to text, keeping <br> as a line break and dropping the ZWJs Webflow pads with. */
 const text = (html) =>
@@ -59,6 +62,40 @@ const text = (html) =>
     .replace(/‍/g, '')
     .split('\n').map((l) => l.trim()).filter(Boolean).join('\n')
     .trim();
+
+
+/**
+ * Like text(), but keeps the links. The old pages put real anchors inside
+ * the affiliations and a few of the exhibition entries, and the boards
+ * draw them underlined, so dropping them would lose content.
+ *
+ * The result is a restricted HTML string: anchors only, everything else
+ * escaped. Nothing but <a href> survives, so it is safe to render.
+ */
+const escape = (s) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+function richText(html) {
+  const withBreaks = html.replace(/<br\s*\/?>/gi, '\n');
+  let out = '';
+  let rest = withBreaks;
+  const anchor = /<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/i;
+  for (;;) {
+    const m = rest.match(anchor);
+    if (!m) break;
+    out += escape(entities(rest.slice(0, m.index).replace(/<[^>]+>/g, '')));
+    const href = entities(m[1]).trim();
+    const label = entities(m[2].replace(/<[^>]+>/g, '')).trim();
+    const safe = /^(https?:|mailto:|tel:|\/)/i.test(href);
+    out += safe ? `<a href="${escape(href)}">${escape(label)}</a>` : escape(label);
+    rest = rest.slice(m.index + m[0].length);
+  }
+  out += escape(entities(rest.replace(/<[^>]+>/g, '')));
+  return out
+    .replace(/\u200d/g, '')
+    .split('\n').map((l) => l.trim()).filter(Boolean).join('\n')
+    .trim();
+}
 
 const first = (html, re) => {
   const m = html.match(re);
@@ -202,6 +239,90 @@ const QUOTATION =
   'an ‘armed eye’ that manages to see into the flash of the moment that there is something ' +
   'beyond banality, beyond nonsense and more than is visible to the ‘naked eye.’”';
 
+/* ---- About ------------------------------------------------------------
+ * Three sections on the old page: About Me, Exhibitions and Awards,
+ * Publications. The two lists are year-holders, each a year and the
+ * entries under it.
+ */
+const aboutHtml = await page('about');
+
+const listSection = (html, marker) => {
+  const start = html.indexOf(marker);
+  if (start < 0) return [];
+  const rest = html.slice(start);
+  const end = rest.indexOf('title-paragraph _2', 1);
+  const section = end > 0 ? rest.slice(0, end) : rest;
+  const years = [];
+  for (const m of section.matchAll(
+    /<div class="list-item year">([\s\S]*?)<\/div>[\s\S]*?<div class="list-item content">([\s\S]*?)<\/div>/g,
+  )) {
+    const year = text(m[1]);
+    const entry = richText(m[2]);
+    if (!year || !entry) continue;
+    const existing = years.find((y) => y.year === year);
+    if (existing) existing.entries.push(entry);
+    else years.push({ year, entries: [entry] });
+  }
+  return years;
+};
+
+const paragraphs = (html, cls) => {
+  const m = html.match(new RegExp(`<p class="${cls}">([\\s\\S]*?)</p>`));
+  return m ? text(m[1]).split('\n').filter(Boolean) : [];
+};
+
+/**
+ * "Co-founder of photo group Naos (1999-2013)" becomes a year range and
+ * the rest, which is how D4-About sets it: the years in their own column.
+ */
+const affiliations = (html) => {
+  const m = html.match(/<p class="paragraph">([\s\S]*?)<\/p>/);
+  if (!m) return [];
+  return richText(m[1])
+    .split('\n')
+    .filter(Boolean)
+    .map((line) => {
+      const range = line.match(/\s*\((\d{4})\s*-\s*(\d{4})?\)\s*$/);
+      if (!range) {
+        note(`about: no year range on "${line.replace(/<[^>]+>/g, '').slice(0, 40)}"`);
+        return { years: null, html: line };
+      }
+      return {
+        years: `${range[1]}\u2013${range[2] ?? ''}`,
+        html: line.slice(0, range.index).trim(),
+      };
+    });
+};
+
+const portraitFile = 'Penko-Skumov.jpg';
+const portraitSize = dimensions[portraitFile];
+if (!portraitSize) note('about: no size for the portrait');
+
+/* The old About page keeps the quotation inside the same block as the
+   bio, in Penko's own prose. D4-About moves it to its own column, so it
+   comes out of the bio here. It also answers the handoff's open question:
+   the words are Penko's own, written on his own About page. */
+const normalise = (t) => t.replace(/[\s\u2018\u2019\u201c\u201d"']/g, '');
+const bioParagraphs = paragraphs(aboutHtml, 'paragraph about');
+const bio = bioParagraphs.filter((t) => normalise(t) !== normalise(QUOTATION));
+if (bio.length !== bioParagraphs.length) {
+  note('about: the quotation was inside the bio block and has been lifted out of it');
+} else {
+  note('about: the quotation was not found in the bio block \u2014 check it still matches');
+}
+
+const about = {
+  portrait: portraitSize
+    ? { file: portraitFile, width: portraitSize.width, height: portraitSize.height, credit: null }
+    : null,
+  bio,
+  affiliations: affiliations(aboutHtml),
+  exhibitions: listSection(aboutHtml, 'title-paragraph _2 exhibitions'),
+  publications: listSection(aboutHtml, 'title-paragraph _2 publications'),
+};
+if (!about.portrait?.credit) note('about: no credit for the portrait \u2014 Penko to supply');
+await writeFile(join(OUT, 'about.json'), JSON.stringify({ about }, null, 1) + '\n');
+
 const slides = HOME.map((slide, i) => {
   const n = i + 1;
   if (slide.quotation) return { n, kind: 'quotation' };
@@ -248,54 +369,6 @@ for (const series of seriesOut) {
 }
 
 
-/* ---- About ------------------------------------------------------------
- * Three sections on the old page: About Me, Exhibitions and Awards,
- * Publications. The two lists are year-holders, each a year and the
- * entries under it.
- */
-const aboutHtml = await page('about');
-
-const listSection = (html, marker) => {
-  const start = html.indexOf(marker);
-  if (start < 0) return [];
-  const rest = html.slice(start);
-  const end = rest.indexOf('title-paragraph _2', 1);
-  const section = end > 0 ? rest.slice(0, end) : rest;
-  const years = [];
-  for (const m of section.matchAll(
-    /<div class="list-item year">([\s\S]*?)<\/div>[\s\S]*?<div class="list-item content">([\s\S]*?)<\/div>/g,
-  )) {
-    const year = text(m[1]);
-    const entry = text(m[2]);
-    if (!year || !entry) continue;
-    const existing = years.find((y) => y.year === year);
-    if (existing) existing.entries.push(entry);
-    else years.push({ year, entries: [entry] });
-  }
-  return years;
-};
-
-const paragraphs = (html, cls) => {
-  const m = html.match(new RegExp(`<p class="${cls}">([\\s\\S]*?)</p>`));
-  return m ? text(m[1]).split('\n').filter(Boolean) : [];
-};
-
-const portraitFile = 'Penko-Skumov.jpg';
-const portraitSize = dimensions[portraitFile];
-if (!portraitSize) note('about: no size for the portrait');
-
-const about = {
-  portrait: portraitSize
-    ? { file: portraitFile, width: portraitSize.width, height: portraitSize.height, credit: null }
-    : null,
-  bio: paragraphs(aboutHtml, 'paragraph about'),
-  affiliations: paragraphs(aboutHtml, 'paragraph'),
-  exhibitions: listSection(aboutHtml, 'title-paragraph _2 exhibitions'),
-  publications: listSection(aboutHtml, 'title-paragraph _2 publications'),
-};
-if (!about.portrait?.credit) note('about: no credit for the portrait \u2014 Penko to supply');
-await writeFile(join(OUT, 'about.json'), JSON.stringify({ about }, null, 1) + '\n');
-
 /* ---- Contact ----------------------------------------------------------
  * The old page sets the email as plain text; here it becomes a real
  * mailto, and the phone a tel. The print list and its sizes are the
@@ -317,13 +390,18 @@ const contact = {
   phoneDisplay: phone ? phone.replace(/^\+359(\d{2})(\d+)$/, '+359 $1 $2') : null,
   instagram: (contactHtml.match(/href="(https:\/\/www\.instagram\.com\/[^"]+)"/) ?? [, null])[1],
   facebook: (contactHtml.match(/href="(https:\/\/www\.facebook\.com\/[^"]+)"/) ?? [, null])[1],
-  /* D4-Contact: the prints on the wall, and their sizes, are placeholders */
+  /* D4-Contact: eight prints on the wall, a landscape and a Vertical
+     Summer portrait alternating. The sizes are the board's placeholders
+     and stay flagged until Penko confirms them, as does the frame finish. */
   prints: [
-    { series: 'days-at-sea', size: null },
-    { series: 'sense-of-freedom', size: null },
-    { series: 'the-festival', size: null },
-    { series: 'six-days-on-an-island', size: null },
-    { series: 'vertical-summer', size: null },
+    { series: 'days-at-sea', size: '45 \u00d7 30 cm', sizeConfirmed: false },
+    { series: 'vertical-summer', size: '30 \u00d7 45 cm', sizeConfirmed: false },
+    { series: 'sense-of-freedom', size: '45 \u00d7 30 cm', sizeConfirmed: false },
+    { series: 'vertical-summer', size: '30 \u00d7 45 cm', sizeConfirmed: false },
+    { series: 'the-festival', size: '45 \u00d7 30 cm', sizeConfirmed: false },
+    { series: 'vertical-summer', size: '30 \u00d7 45 cm', sizeConfirmed: false },
+    { series: 'six-days-on-an-island', size: '45 \u00d7 30 cm', sizeConfirmed: false },
+    { series: 'vertical-summer', size: '30 \u00d7 45 cm', sizeConfirmed: false },
   ],
 };
 if (!contact.sentence) note('contact: no sentence found on the old page');
