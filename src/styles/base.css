@@ -188,22 +188,32 @@ a {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(var(--cols), 1fr);
+  grid-template-columns: var(--grid-template);
   column-gap: var(--gutter);
 }
 
-.span-1 { grid-column: span 1; }
-.span-2 { grid-column: span 2; }
-.span-3 { grid-column: span 3; }
-.span-4 { grid-column: span 4; }
-.span-5 { grid-column: span 5; }
-.span-6 { grid-column: span 6; }
-.span-7 { grid-column: span 7; }
-.span-8 { grid-column: span 8; }
-.span-9 { grid-column: span 9; }
-.span-10 { grid-column: span 10; }
-.span-11 { grid-column: span 11; }
-.span-12 { grid-column: span 12; }
+.span-1 { grid-column-end: span 1; }
+.span-2 { grid-column-end: span 2; }
+.span-3 { grid-column-end: span 3; }
+.span-4 { grid-column-end: span 4; }
+.span-5 { grid-column-end: span 5; }
+.span-6 { grid-column-end: span 6; }
+.span-7 { grid-column-end: span 7; }
+.span-8 { grid-column-end: span 8; }
+.span-9 { grid-column-end: span 9; }
+.span-10 { grid-column-end: span 10; }
+.span-11 { grid-column-end: span 11; }
+.span-12 { grid-column-end: span 12; }
+
+/* The span sets only the END of the range, so that .start-9 can set the
+   start without wiping it: `grid-column: span 4` followed by
+   `grid-column-start: 9` would leave the module one column wide. */
+
+/* a module that is itself laid out on the page's columns */
+.subgrid {
+  display: grid;
+  grid-template-columns: subgrid;
+}
 
 /* where a module starts, for "columns 9-12" and the like */
 .start-1 { grid-column-start: 1; }

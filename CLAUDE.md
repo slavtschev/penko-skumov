@@ -17,6 +17,9 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 4. Ink alignment is derived, never typed in: `scripts/font-metrics.py` writes `src/lib/satoshi-metrics.json`, `src/lib/ink.ts` does the arithmetic. Horizontal offsets truncate, vertical line-box tops round up; those two rules reproduce every offset on the boards. A typeface swap re-measures itself.
 5. `font-display: block`, not swap: a fallback face would move every ink-aligned line 1 to 2 px under the reader.
 
+## Decisions taken in the build (step 3, Dimitar: "decide the best")
+6. Frame boxes are **derived, not fixed**: the photograph's own proportion snapped DOWN to a whole pixel, at whatever width the module comes out to. At 1440 that gives 440 x 293 and 325 x 487, where the boards draw 440 x 292 and 325 x 488. The boards are right about the intent -- an integer box, with the 0.45% of crop that costs -- but 292 is only correct at 1440. The grid is fluid with no maximum width, so at 1280 or 1600 the module is not 440 wide and the height has to follow it. A fixed number would be wrong at every width but one. `Frame.astro` takes a `boxHeight` override if a layout ever does need to fix one.
+
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
 - Content in Astro content collections: `series/*` (title, years, epigraph, statement, group: projects or archive, order, cover) and `frames` (series, order, file, width, height, place, year, alt). Home edit = a list of frame ids. About, Contact as markdown or data.

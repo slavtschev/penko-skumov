@@ -1,0 +1,33 @@
+{
+ "contact": {
+  "title": "Contact",
+  "sentence": "Contact me via DM on Instagram or Facebook for fine art prints, more info or just to say hi.",
+  "email": "skumov@gmail.com",
+  "phone": "+359898958807",
+  "phoneDisplay": "+359 89 8958807",
+  "instagram": "https://www.instagram.com/skumata/",
+  "facebook": "https://www.facebook.com/PenkoSkumov",
+  "prints": [
+   {
+    "series": "days-at-sea",
+    "size": null
+   },
+   {
+    "series": "sense-of-freedom",
+    "size": null
+   },
+   {
+    "series": "the-festival",
+    "size": null
+   },
+   {
+    "series": "six-days-on-an-island",
+    "size": null
+   },
+   {
+    "series": "vertical-summer",
+    "size": null
+   }
+  ]
+ }
+}

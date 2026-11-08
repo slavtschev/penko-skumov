@@ -153,6 +153,10 @@ for (const [index, [slug, title, years, group, source]] of SERIES.entries()) {
   seriesOut.push({
     slug, title, years, group,
     order: index + 1,
+    /* The Projects preview and the Home captions read "Pomorie, Bulgaria,
+       2018-2020". The old site has no place field anywhere -- it is only
+       ever prose inside a statement -- so this stays null for Penko. */
+    place: null,
     epigraph,
     statement,
     cover: files.length ? `${slug}-01` : null,
@@ -243,6 +247,90 @@ for (const series of seriesOut) {
   }
 }
 
+
+/* ---- About ------------------------------------------------------------
+ * Three sections on the old page: About Me, Exhibitions and Awards,
+ * Publications. The two lists are year-holders, each a year and the
+ * entries under it.
+ */
+const aboutHtml = await page('about');
+
+const listSection = (html, marker) => {
+  const start = html.indexOf(marker);
+  if (start < 0) return [];
+  const rest = html.slice(start);
+  const end = rest.indexOf('title-paragraph _2', 1);
+  const section = end > 0 ? rest.slice(0, end) : rest;
+  const years = [];
+  for (const m of section.matchAll(
+    /<div class="list-item year">([\s\S]*?)<\/div>[\s\S]*?<div class="list-item content">([\s\S]*?)<\/div>/g,
+  )) {
+    const year = text(m[1]);
+    const entry = text(m[2]);
+    if (!year || !entry) continue;
+    const existing = years.find((y) => y.year === year);
+    if (existing) existing.entries.push(entry);
+    else years.push({ year, entries: [entry] });
+  }
+  return years;
+};
+
+const paragraphs = (html, cls) => {
+  const m = html.match(new RegExp(`<p class="${cls}">([\\s\\S]*?)</p>`));
+  return m ? text(m[1]).split('\n').filter(Boolean) : [];
+};
+
+const portraitFile = 'Penko-Skumov.jpg';
+const portraitSize = dimensions[portraitFile];
+if (!portraitSize) note('about: no size for the portrait');
+
+const about = {
+  portrait: portraitSize
+    ? { file: portraitFile, width: portraitSize.width, height: portraitSize.height, credit: null }
+    : null,
+  bio: paragraphs(aboutHtml, 'paragraph about'),
+  affiliations: paragraphs(aboutHtml, 'paragraph'),
+  exhibitions: listSection(aboutHtml, 'title-paragraph _2 exhibitions'),
+  publications: listSection(aboutHtml, 'title-paragraph _2 publications'),
+};
+if (!about.portrait?.credit) note('about: no credit for the portrait \u2014 Penko to supply');
+await writeFile(join(OUT, 'about.json'), JSON.stringify({ about }, null, 1) + '\n');
+
+/* ---- Contact ----------------------------------------------------------
+ * The old page sets the email as plain text; here it becomes a real
+ * mailto, and the phone a tel. The print list and its sizes are the
+ * design's, not the old site's, and the sizes are placeholders until
+ * Penko confirms them.
+ */
+const contactHtml = await page('contact');
+const contactBody = text(
+  (contactHtml.match(/<(?:p|div) class="paragraph contact">([\s\S]*?)<\/(?:p|div)>/) ?? [, ''])[1],
+);
+const email = (contactHtml.match(/[\w.+-]+@[\w.-]+\.\w+/) ?? [null])[0];
+const phone = (contactHtml.match(/href="tel:([^"]+)"/) ?? [, null])[1];
+
+const contact = {
+  title: 'Contact',
+  sentence: contactBody.replace(/^Phone:[\s\S]*$/m, '').trim() || null,
+  email,
+  phone,
+  phoneDisplay: phone ? phone.replace(/^\+359(\d{2})(\d+)$/, '+359 $1 $2') : null,
+  instagram: (contactHtml.match(/href="(https:\/\/www\.instagram\.com\/[^"]+)"/) ?? [, null])[1],
+  facebook: (contactHtml.match(/href="(https:\/\/www\.facebook\.com\/[^"]+)"/) ?? [, null])[1],
+  /* D4-Contact: the prints on the wall, and their sizes, are placeholders */
+  prints: [
+    { series: 'days-at-sea', size: null },
+    { series: 'sense-of-freedom', size: null },
+    { series: 'the-festival', size: null },
+    { series: 'six-days-on-an-island', size: null },
+    { series: 'vertical-summer', size: null },
+  ],
+};
+if (!contact.sentence) note('contact: no sentence found on the old page');
+note('contact: print sizes and frame finish are unset \u2014 Penko to confirm');
+note(`contact: keeping the phone number (${contact.phoneDisplay}) \u2014 confirm it should stay`);
+await writeFile(join(OUT, 'contact.json'), JSON.stringify({ contact }, null, 1) + '\n');
+
 /* ---- report ---------------------------------------------------------- */
 const withSize = frames.length;
 const placed = frames.filter((f) => f.place).length;
@@ -265,5 +353,7 @@ console.log(`  place and year  ${placed}/${withSize} frames have them`);
 console.log(`  alt text        ${alt}/${withSize} frames have it`);
 console.log(`  home slides     ${named}/12 photographs identified`);
 console.log(`  quotation source: unknown`);
+console.log(`  about          ${about.bio.length} bio para, ${about.exhibitions.length} exhibition years, ${about.publications.length} publication years`);
+console.log(`  contact        ${contact.email ?? 'no email'}, ${contact.phoneDisplay ?? 'no phone'}`);
 console.log(`\nNotes (${notes.length}):`);
 for (const n of notes) console.log(`  - ${n}`);

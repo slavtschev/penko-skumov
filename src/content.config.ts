@@ -22,6 +22,8 @@ const series = defineCollection({
     years: z.string(),
     group,
     order: z.number().int().positive(),
+    /** "Pomorie, Bulgaria"; null until Penko supplies it */
+    place: z.string().nullable(),
     epigraph: z.string().nullable(),
     statement: z.string().nullable(),
     /** id of the frame the Projects list shows under the pointer */
@@ -69,4 +71,40 @@ const home = defineCollection({
   }),
 });
 
-export const collections = { series, frames, home };
+const about = defineCollection({
+  loader: file('./src/content/about.json'),
+  schema: z.object({
+    portrait: z
+      .object({
+        file: z.string(),
+        width: z.number().int().positive(),
+        height: z.number().int().positive(),
+        /** who took it; unknown, and Penko has to say */
+        credit: z.string().nullable(),
+      })
+      .nullable(),
+    bio: z.array(z.string()),
+    affiliations: z.array(z.string()),
+    /** one entry per year, newest handling left to the page */
+    exhibitions: z.array(z.object({ year: z.string(), entries: z.array(z.string()) })),
+    publications: z.array(z.object({ year: z.string(), entries: z.array(z.string()) })),
+  }),
+});
+
+const contact = defineCollection({
+  loader: file('./src/content/contact.json'),
+  schema: z.object({
+    title: z.string(),
+    sentence: z.string().nullable(),
+    /** set as a real mailto and tel on the page */
+    email: z.string().nullable(),
+    phone: z.string().nullable(),
+    phoneDisplay: z.string().nullable(),
+    instagram: z.string().nullable(),
+    facebook: z.string().nullable(),
+    /** the prints on the wall; sizes are placeholders until Penko confirms */
+    prints: z.array(z.object({ series: z.string(), size: z.string().nullable() })),
+  }),
+});
+
+export const collections = { series, frames, home, about, contact };

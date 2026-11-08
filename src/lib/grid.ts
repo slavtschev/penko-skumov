@@ -80,14 +80,17 @@ export function widthsFor(sourceWidth: number): number[] {
 
 /** The tier tokens, emitted so the CSS and the `sizes` above cannot drift. */
 export function gridTokens(): string {
+  // --grid-template carries the whole track list, because repeat() wants a
+  // literal count: `repeat(var(--cols), 1fr)` is invalid and silently
+  // leaves the element with one implicit column.
+  const vars = (t: Tier) =>
+    `--cols:${t.columns};--margin:${t.margin}px;--gutter:${t.gutter}px;` +
+    `--grid-template:repeat(${t.columns},1fr);`;
   const base = ascending[0];
-  const root = `:root{--cols:${base.columns};--margin:${base.margin}px;--gutter:${base.gutter}px;}`;
+  const root = `:root{${vars(base)}}`;
   const queries = ascending
     .slice(1)
-    .map(
-      (t) =>
-        `@media (min-width:${t.from}px){:root{--cols:${t.columns};--margin:${t.margin}px;--gutter:${t.gutter}px;}}`,
-    )
+    .map((t) => `@media (min-width:${t.from}px){:root{${vars(t)}}}`)
     .join('');
   return root + queries;
 }
