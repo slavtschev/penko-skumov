@@ -251,6 +251,31 @@ const navInkRight = inkRight('Next', 'ui');
     cursor: pointer;
   }
 
+  /* Tier S has eight columns, so a nine-column plate overflows the page.
+     The handoff reduces the spans here: plate 7, portrait 3. Not drawn
+     on any board. */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .plate {
+      width: min(calc(7 * var(--col) + 6 * var(--gutter)), var(--fits));
+    }
+
+    .plate.portrait {
+      width: min(calc(3 * var(--col) + 2 * var(--gutter)), var(--fits));
+    }
+
+    .quote {
+      width: calc(6 * var(--col) + 5 * var(--gutter));
+    }
+
+    .counter {
+      grid-column: 6 / 8;
+    }
+
+    .controls {
+      grid-column: 6 / -1;
+    }
+  }
+
   @media (max-width: 767px) {
     .show {
       --line: 75px;
