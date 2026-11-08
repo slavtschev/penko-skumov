@@ -1,0 +1,274 @@
+---
+import { boxTopForCap, inkCentreTop, inkLeft, inkRight } from '../lib/ink';
+import { nav } from '../lib/nav';
+import type { NavKey } from '../lib/nav';
+
+interface Props {
+  current?: NavKey;
+}
+
+const { current } = Astro.props;
+
+const NAME = 'Penko Skumov';
+const CLOSE = 'Close';
+
+/* Every offset below is measured from Satoshi rather than typed in: see
+   src/lib/ink.ts. At the L tier they come out as the Designs 4 boards draw
+   them -- the name at left 39 / top 22, the nav on the margin at top 22, the
+   menu words at 18 / 20 / 19 with cap-tops on 64, 112, 160.
+
+   The name is not marked as the current page, on the Home page either: that
+   is how D4-Home draws it. */
+const nameTop = inkCentreTop('name', 64);
+const navTop = inkCentreTop('ui', 64);
+
+const nameInk = { l: inkLeft(NAME, 'name'), r: inkRight(NAME, 'name') };
+const closeInk = { l: inkLeft(CLOSE, 'ui'), r: inkRight(CLOSE, 'ui') };
+
+const navItems = nav.map((item) => ({
+  ...item,
+  ink: { l: inkLeft(item.label, 'ui'), r: inkRight(item.label, 'ui') },
+}));
+const navInkRight = navItems[navItems.length - 1].ink.r;
+
+/* The sheet's three words: cap-tops at 64, 112, 160 (D4-Phone-Menu). */
+const menuItems = nav.map((item, i) => ({
+  ...item,
+  top: boxTopForCap('title', 64 + i * 48),
+  ink: { l: inkLeft(item.label, 'title'), r: inkRight(item.label, 'title') },
+}));
+
+const underline = (l: number, r: number) => `--ul-l: ${l}px; --ul-r: ${r}px`;
+const nameStyle = `top: ${nameTop}px; left: calc(var(--margin) - ${nameInk.l}px); ${underline(nameInk.l, nameInk.r)}`;
+---
+
+<header class="site-header">
+  <a class="u t-name name" href="/" style={nameStyle}>{NAME}</a>
+
+  <nav
+    class="nav t-ui"
+    aria-label="Main"
+    style={`top: ${navTop}px; right: calc(var(--margin) - ${navInkRight}px)`}>
+    {
+      navItems.map((item) => (
+        <a
+          class="u"
+          href={item.href}
+          aria-current={current === item.key ? 'page' : undefined}
+          style={underline(item.ink.l, item.ink.r)}>{item.label}</a>
+      ))
+    }
+  </nav>
+
+  <button class="burger" type="button" aria-label="Menu" aria-expanded="false" aria-controls="menu">
+    <i></i><i></i><i></i>
+  </button>
+</header>
+
+<div class="sheet" id="menu" hidden>
+  <a class="u t-name name" href="/" style={nameStyle} tabindex="-1">{NAME}</a>
+
+  <button class="close" type="button" aria-label="Close menu">
+    <span
+      class="u t-ui"
+      style={`top: ${navTop - 8}px; right: calc(var(--margin) - ${closeInk.r}px); ${underline(closeInk.l, closeInk.r)}`}
+      >{CLOSE}</span
+    >
+  </button>
+
+  <nav class="sheet-nav" aria-label="Main">
+    {
+      menuItems.map((item, i) => (
+        <a
+          class="u t-title"
+          href={item.href}
+          aria-current={current === item.key ? 'page' : undefined}
+          style={`--i: ${i}; top: ${item.top}px; left: calc(var(--margin) - ${item.ink.l}px); ${underline(item.ink.l, item.ink.r)}`}>{item.label}</a>
+      ))
+    }
+  </nav>
+
+  <slot name="sheet-footer" />
+</div>
+
+<style>
+  .name {
+    position: absolute;
+    white-space: nowrap;
+  }
+
+  .nav {
+    position: absolute;
+    display: flex;
+    gap: var(--nav-gap);
+    white-space: nowrap;
+  }
+
+  /* The hamburger: three 1px rules, 22 wide, 5 apart, in a 64 x 48 hit area
+     hung off the right edge so the rules end on the margin. */
+  .burger {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 8px;
+    width: 64px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+  }
+
+  .burger i {
+    position: absolute;
+    right: var(--margin);
+    width: 22px;
+    height: 1px;
+    background: var(--ink);
+  }
+
+  .burger i:nth-child(1) {
+    top: 18px;
+  }
+
+  .burger i:nth-child(2) {
+    top: 23px;
+  }
+
+  .burger i:nth-child(3) {
+    top: 28px;
+  }
+
+  @media (max-width: 767px) {
+    .nav {
+      display: none;
+    }
+
+    .burger {
+      display: block;
+    }
+  }
+
+  /* --- the sheet -------------------------------------------------------
+     A white sheet over the page: dissolves in over 600ms, out over 300ms,
+     and the three words cut in 100ms apart. */
+  .sheet {
+    --stagger: 100ms;
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    background: var(--ground);
+    opacity: 0;
+    transition: opacity var(--dissolve-out) var(--timing);
+  }
+
+  .sheet[hidden] {
+    display: none;
+  }
+
+  .sheet.open {
+    opacity: 1;
+    transition-duration: var(--dissolve);
+  }
+
+  /* Close sits where the rules were: the same 64 x 48 hit area off the right
+     edge, its ink on the margin and on the name's line. */
+  .close {
+    position: absolute;
+    right: 0;
+    top: 8px;
+    width: 64px;
+    height: 48px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .close span {
+    position: absolute;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .close:hover span::after,
+  .close:focus-visible span::after {
+    opacity: 1;
+  }
+
+  .sheet-nav a {
+    position: absolute;
+    white-space: nowrap;
+    opacity: 0;
+  }
+
+  /* the words cut in, 100ms apart */
+  .sheet.open .sheet-nav a {
+    opacity: 1;
+    transition: opacity var(--cut) var(--timing) calc(var(--i) * var(--stagger));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sheet {
+      --stagger: 0ms;
+    }
+  }
+</style>
+
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('.burger');
+  const sheet = document.querySelector<HTMLElement>('.sheet');
+  const close = sheet?.querySelector<HTMLButtonElement>('.close');
+
+  if (burger && sheet && close) {
+    const focusable = () =>
+      Array.from(sheet.querySelectorAll<HTMLElement>('a[href], button')).filter(
+        (el) => el.tabIndex >= 0,
+      );
+
+    const open = () => {
+      sheet.hidden = false;
+      // one frame on display:block before the opacity transition can run
+      requestAnimationFrame(() => sheet.classList.add('open'));
+      burger.setAttribute('aria-expanded', 'true');
+      document.documentElement.style.overflow = 'hidden';
+      close.focus();
+    };
+
+    const shut = () => {
+      sheet.classList.remove('open');
+      // read after dropping .open: the sheet goes out over 300ms, not the 600ms it came in over
+      const ms = parseFloat(getComputedStyle(sheet).transitionDuration) * 1000;
+      burger.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+      if (ms > 0) window.setTimeout(() => (sheet.hidden = true), ms);
+      else sheet.hidden = true;
+      burger.focus();
+    };
+
+    burger.addEventListener('click', open);
+    close.addEventListener('click', shut);
+
+    sheet.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        shut();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+  }
+</script>

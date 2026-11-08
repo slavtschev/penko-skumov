@@ -1,0 +1,42 @@
+---
+import '../styles/base.css';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { inkTokens } from '../lib/ink';
+import type { NavKey } from '../lib/nav';
+
+interface Props {
+  /** The <title>; "Penko Skumov" is appended on every page but the Home. */
+  title: string;
+  current?: NavKey;
+  /** The Home carries no footer. */
+  footer?: boolean;
+}
+
+const { title, current, footer = true } = Astro.props;
+const documentTitle = footer ? `${title} — Penko Skumov` : title;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{documentTitle}</title>
+    <link rel="preload" href="/fonts/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/Satoshi-Medium.woff2" as="font" type="font/woff2" crossorigin />
+    {/* Vertical ink offsets, measured from Satoshi's own metrics at build. */}
+    <style set:html={inkTokens()}></style>
+  </head>
+  <body>
+    <Header current={current}>
+      <Footer slot="sheet-footer" variant="sheet" />
+    </Header>
+
+    <main class="site-main page">
+      <slot />
+    </main>
+
+    {footer && <Footer />}
+  </body>
+</html>

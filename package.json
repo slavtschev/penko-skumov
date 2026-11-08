@@ -1,0 +1,21 @@
+{
+  "name": "penko-skumov",
+  "version": "0.0.0",
+  "description": "penkoskumov.com, rebuilt. Built against the Designs 4 boards.",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "metrics": "python3 scripts/font-metrics.py public/fonts"
+  },
+  "dependencies": {
+    "astro": "5.14.1"
+  },
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^5.9.3"
+  }
+}

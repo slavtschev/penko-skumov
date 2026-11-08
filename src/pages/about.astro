@@ -1,0 +1,14 @@
+---
+import Page from '../layouts/Page.astro';
+import { inkLeft } from '../lib/ink';
+
+const title = 'About';
+const ink = inkLeft(title, 'title');
+---
+
+<Page title={title} current="about">
+  <h1 class="t-title ink-top" style={`margin-left: -${ink}px`}>{title}</h1>
+  <p class="t-caption" style="margin-top: var(--row-gap)">
+    Placeholder. The About page arrives at build step 4.
+  </p>
+</Page>

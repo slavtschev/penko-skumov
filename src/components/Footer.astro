@@ -1,0 +1,50 @@
+---
+import { inkLeft, inkRight } from '../lib/ink';
+
+interface Props {
+  /** 'page' sits at the bottom of the page, 'sheet' at the bottom of the menu. */
+  variant?: 'page' | 'sheet';
+}
+
+const { variant = 'page' } = Astro.props;
+
+/* The year is generated at build. */
+const left = `© ${new Date().getFullYear()} Penko Skumov`;
+const right = 'Web design Dimitar Slavchev';
+
+const leftInk = inkLeft(left, 'caption');
+const rightInk = inkRight(right, 'caption');
+---
+
+<footer class:list={['site-footer', 'page', 't-caption', `at-${variant}`]}>
+  <div class="lines">
+    <span style={`margin-left: -${leftInk}px`}>{left}</span>
+    <span style={`margin-right: -${rightInk}px`}>{right}</span>
+  </div>
+</footer>
+
+<style>
+  /* Phone: the two lines stack on consecutive 16px line boxes. */
+  .lines {
+    display: flex;
+    flex-direction: column;
+  }
+
+  @media (min-width: 768px) {
+    .lines {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  .at-sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .at-sheet .lines {
+    flex-direction: column;
+  }
+</style>

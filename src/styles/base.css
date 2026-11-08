@@ -1,0 +1,255 @@
+@import './tokens.css';
+
+/* --- Satoshi, self-hosted, the two weights the design uses ---------------
+ * font-display: block, not swap. Every ink offset in this design is measured
+ * from Satoshi; rendering a line in Arial first and swapping would move the
+ * text 1 to 2 px under the reader. Both files are preloaded from the same
+ * origin and weigh 27 KB each, so the block period is not perceptible.
+ */
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('/fonts/Satoshi-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: block;
+}
+
+/* --- the page ----------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--ground);
+  /* nothing in the design hangs off a scroll position */
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 var(--ui-size) / var(--ui-line) var(--family);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+ol,
+figure {
+  margin: 0;
+  font-weight: inherit;
+  font-size: inherit;
+}
+
+ul,
+ol {
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* --- state. Never colour. ----------------------------------------------
+ * hover and the current page: a 1px rule under the text, cut in at 0ms.
+ * The rule is inset by the first and last glyph's side bearing so it spans
+ * the ink, not the advance width -- --ul-l / --ul-r come from inkLeft and
+ * inkRight at build time, --ul-b from the type style.
+ */
+.u {
+  position: relative;
+  display: inline-block;
+}
+
+.u::after {
+  content: '';
+  position: absolute;
+  left: var(--ul-l, 0px);
+  right: var(--ul-r, 0px);
+  bottom: var(--ul-b, 1px);
+  height: 1px;
+  background: currentColor;
+  opacity: 0;
+}
+
+.u:hover::after,
+.u:focus-visible::after,
+.u[aria-current]::after {
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+/* --- type styles -------------------------------------------------------
+ * Each one carries the ink offsets for its own size, so .ink-top can pull a
+ * line up onto a cap-top and .u can place its rule.
+ */
+.t-name {
+  font: 500 var(--name-size) / var(--name-line) var(--family);
+  letter-spacing: var(--name-tracking);
+  text-transform: uppercase;
+  --ink-cap: var(--cap-name);
+  --ink-cap-int: var(--cap-int-name);
+  --ul-b: 1px;
+}
+
+.t-ui {
+  font: 400 var(--ui-size) / var(--ui-line) var(--family);
+  --ink-cap: var(--cap-ui);
+  --ink-cap-int: var(--cap-int-ui);
+  --ul-b: 1px;
+}
+
+.t-caption {
+  font: 400 var(--caption-size) / var(--caption-line) var(--family);
+  color: var(--grey);
+  font-variant-numeric: tabular-nums;
+  --ink-cap: var(--cap-caption);
+  --ink-cap-int: var(--cap-int-caption);
+  --ul-b: -1px;
+}
+
+.t-title {
+  font: 500 var(--title-size) / var(--title-line) var(--family);
+  letter-spacing: var(--title-tracking);
+  --ink-cap: var(--cap-title);
+  --ink-cap-int: var(--cap-int-title);
+  --ul-b: 2px;
+}
+
+.t-text {
+  font: 400 var(--text-size) / var(--text-line) var(--family);
+  --ink-cap: var(--cap-text);
+  --ink-cap-int: var(--cap-int-text);
+  --ul-b: 1px;
+}
+
+/* --- ink alignment utilities -------------------------------------------- */
+
+/* Pull a line up so its cap-top, not its line box, sits on the flow edge.
+   By whole pixels, as the boards do: a 28/32 line whose cap-top belongs on
+   64 has its box at 58, which leaves the cap-top a fraction below 64 rather
+   than a fraction above it. */
+.ink-top {
+  margin-top: calc(-1 * var(--ink-cap-int, 0px));
+}
+
+/* shift a string by its side bearing so its ink sits on the margin */
+.ink-left {
+  margin-left: calc(-1 * var(--ink-l, 0px));
+}
+
+.ink-right {
+  margin-right: calc(-1 * var(--ink-r, 0px));
+}
+
+/* --- grid --------------------------------------------------------------
+ * A module is n columns plus n-1 gutters.
+ *
+ * Put anything that has to sit on integer pixels -- a frame, a plate -- on
+ * the tracks of .grid, which at 1440 are exactly the 95px column the boards
+ * are drawn on, running 40 to 1400. --col is the same number for the places
+ * that need it as a value rather than a track, but the browser resolves that
+ * division to 1/64 px (94.984 rather than 95), so do not build a frame width
+ * out of it.
+ */
+.page {
+  padding-inline: var(--margin);
+  --col: calc((100% - (var(--cols) - 1) * var(--gutter)) / var(--cols));
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  column-gap: var(--gutter);
+}
+
+.span-1 { grid-column: span 1; }
+.span-2 { grid-column: span 2; }
+.span-3 { grid-column: span 3; }
+.span-4 { grid-column: span 4; }
+.span-5 { grid-column: span 5; }
+.span-6 { grid-column: span 6; }
+.span-7 { grid-column: span 7; }
+.span-8 { grid-column: span 8; }
+.span-9 { grid-column: span 9; }
+.span-10 { grid-column: span 10; }
+.span-11 { grid-column: span 11; }
+.span-12 { grid-column: span 12; }
+
+/* where a module starts, for "columns 9-12" and the like */
+.start-1 { grid-column-start: 1; }
+.start-2 { grid-column-start: 2; }
+.start-3 { grid-column-start: 3; }
+.start-4 { grid-column-start: 4; }
+.start-5 { grid-column-start: 5; }
+.start-6 { grid-column-start: 6; }
+.start-7 { grid-column-start: 7; }
+.start-8 { grid-column-start: 8; }
+.start-9 { grid-column-start: 9; }
+.start-10 { grid-column-start: 10; }
+.start-11 { grid-column-start: 11; }
+.start-12 { grid-column-start: 12; }
+
+/* --- the page frame ----------------------------------------------------- */
+
+.site-header {
+  position: relative;
+  flex: none;
+  height: var(--header);
+}
+
+.site-main {
+  flex: 1 0 auto;
+}
+
+.site-footer {
+  flex: none;
+  padding-bottom: var(--footer-gap);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --- reduced motion: everything is a cut -------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dissolve-out: 0ms;
+    --dissolve: 0ms;
+    --dissolve-load: 0ms;
+  }
+}
