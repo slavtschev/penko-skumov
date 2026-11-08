@@ -7,15 +7,17 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "metrics": "python3 scripts/font-metrics.py public/fonts"
+    "metrics": "python3 scripts/font-metrics.py public/fonts",
+    "verify": "node scripts/verify.mjs"
   },
   "dependencies": {
-    "astro": "5.14.1"
+    "astro": "7.4.7"
   },
   "private": true,
   "type": "module",
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
-    "typescript": "^5.9.3"
+    "playwright": "^1.65.0",
+    "typescript": "^6.0.3"
   }
 }
