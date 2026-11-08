@@ -5,7 +5,8 @@
   "group": "projects",
   "order": 6,
   "place": null,
-  "epigraph": "Coincidence is God’s way of remaining anonymous. - Albert Einstein",
+  "epigraph": "Coincidence is God’s way of remaining anonymous.",
+  "epigraphSource": "Albert Einstein",
   "statement": null,
   "cover": "coincidance-01",
   "legacyPage": "coincidence.html"

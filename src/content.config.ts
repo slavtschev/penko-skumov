@@ -25,6 +25,8 @@ const series = defineCollection({
     /** "Pomorie, Bulgaria"; null until Penko supplies it */
     place: z.string().nullable(),
     epigraph: z.string().nullable(),
+    /** who said it, set under the epigraph on the boards */
+    epigraphSource: z.string().nullable(),
     statement: z.string().nullable(),
     /** id of the frame the Projects list shows under the pointer */
     cover: z.string().nullable(),

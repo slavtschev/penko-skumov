@@ -95,6 +95,30 @@ const CHECKS = [
   ['1440 Contact h1', 'contact', 1440, 'h1', (b) => [b.x, b.y], [959, 58]],
   ['1440 first row value', 'contact', 1440, '.row .value a', (b) => [b.x, Math.round(b.y)], [1075, 642]],
 
+  /* step 5 -- D4-Series-Days and D4-Series-Vertical. Every text position
+     is the board's. The frame boxes are derived rather than drawn (293
+     where the board has 292, 487 where it has 488), so the way on, which
+     sits in the last row, carries that difference times the row count. */
+  ['1440 series h1', 'days-at-sea', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
+  ['1440 series years', 'days-at-sea', 1440, '.years', (b) => [b.x, b.y], [40, 93]],
+  ['1440 epigraph', 'days-at-sea', 1440, '.epigraph', (b) => [b.x, b.y], [40, 224]],
+  ['1440 epigraph source', 'days-at-sea', 1440, '.attribution', (b) => [b.x, b.y], [40, 261]],
+  ['1440 statement col 1', 'days-at-sea', 1440, '.statement', (b) => [b.x, b.y, b.w], [500, 56, 440]],
+  ['1440 statement col 2', 'days-at-sea', 1440, '.statement + .statement', (b) => [b.x, b.y, b.w], [960, 56, 440]],
+  ['1440 first frame', 'days-at-sea', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 352, 440, 293]],
+  ['1440 third frame in row', 'days-at-sea', 1440, '.cell:nth-child(3) .box', (b) => [b.x, b.y], [960, 352]],
+  ['1440 portrait frame', 'vertical-summer', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 184, 325, 487]],
+  ['1440 fourth portrait frame', 'vertical-summer', 1440, '.cell:nth-child(4) .box', (b) => [b.x, b.y], [1075, 184]],
+  ['1440 way on label', 'vertical-summer', 1440, '.next-label', (b) => [b.x, b.y], [1074, 1194]],
+  ['1440 way on title', 'vertical-summer', 1440, '.next-title', (b) => [b.x, b.y], [1073, 1221]],
+  ['1440 way on years', 'vertical-summer', 1440, '.next-years', (b) => [b.x, b.y], [1075, 1263]],
+  ['1440 back, 5 under the cell', 'vertical-summer', 1440, '.back', (b) => [b.x, b.y], [1074, 1674]],
+  ['390 series h1', 'days-at-sea', 390, 'h1', (b) => [b.x, b.y], [18, 58]],
+  ['390 epigraph', 'days-at-sea', 390, '.epigraph', (b) => [b.x, b.y], [20, 136]],
+  ['390 epigraph source', 'days-at-sea', 390, '.attribution', (b) => [b.x, b.y], [20, 201]],
+  ['390 statement', 'days-at-sea', 390, '.statement', (b) => [b.x, b.y, b.w], [20, 244, 350]],
+  ['390 first frame', 'days-at-sea', 390, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [20, 744, 350, 233]],
+
   /* step 4 -- D4-404 */
   ['1440 404 h1', '404', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
   ['1440 404 sentence', '404', 1440, '.aside p', (b) => [b.x, b.y, b.w], [500, 56, 440]],
@@ -132,8 +156,11 @@ for (const width of [1440, 390]) {
   const height = width === 1440 ? 2200 : 2600;
   const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
 
-  for (const name of ['home', 'projects', 'about', 'contact', '404']) {
-    const path = name === 'home' ? '' : name === '404' ? '404.html' : `${name}/`;
+  const PAGES = ['home', 'projects', 'about', 'contact', '404', 'days-at-sea', 'vertical-summer'];
+  for (const name of PAGES) {
+    const path =
+      name === 'home' ? '' : name === '404' ? '404.html'
+      : name.includes('-') ? `projects/${name}/` : `${name}/`;
     await page.goto(`http://localhost:${PORT}/${path}`, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
     // photographs dissolve in; measure the settled page

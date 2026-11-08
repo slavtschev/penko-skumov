@@ -1,0 +1,266 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getCollection } from 'astro:content';
+import Frame from '../../components/Frame.astro';
+import Page from '../../layouts/Page.astro';
+import { inkLeft, inkRight } from '../../lib/ink';
+
+/* D4-Series-Days and D4-Series-Vertical. Title, years, epigraph and
+   statement across three modules, then bare frames -- no numbers, no
+   captions -- on the page's own columns: four each for a landscape
+   series, three each for a portrait one. The last cell is the way on. */
+
+export const getStaticPaths = (async () => {
+  const series = (await getCollection('series')).sort((a, b) => a.data.order - b.data.order);
+  const frames = await getCollection('frames');
+  const withFrames = series.filter((s) => frames.some((f) => f.data.series === s.data.slug));
+
+  return withFrames.map((entry, i) => ({
+    params: { series: entry.data.slug },
+    props: {
+      series: entry.data,
+      frames: frames
+        .filter((f) => f.data.series === entry.data.slug)
+        .sort((a, b) => a.data.order - b.data.order)
+        .map((f) => f.data),
+      /* the way on: the next series that has frames, wrapping round */
+      next: withFrames[(i + 1) % withFrames.length].data,
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { series, frames, next } = Astro.props;
+
+/* A portrait series takes three columns a frame, a landscape one four. */
+const portrait = frames[0].width < frames[0].height;
+const span = portrait ? 3 : 4;
+const perRow = portrait ? 4 : 3;
+
+/* The statement runs across modules 5-8 and 9-12, the first taking the
+   extra paragraph where they do not divide evenly. */
+const paragraphs = series.statement ? series.statement.split('\n').filter(Boolean) : [];
+const half = Math.ceil(paragraphs.length / 2);
+const columns = paragraphs.length ? [paragraphs.slice(0, half), paragraphs.slice(half)] : [];
+
+/* An epigraph that opens with a quotation mark is set flush, as the boards
+   do: you do not align a measure on a quote mark -- if anything it hangs
+   outside. One that opens with a letter is ink-aligned like everything. */
+const opensWithQuote = /^[“‘"']/.test(series.epigraph ?? '');
+const epigraphInk = series.epigraph && !opensWithQuote ? inkLeft(series.epigraph, 'text') : 0;
+
+const titleInk = inkLeft(series.title, 'title');
+const nextInk = { l: inkLeft(next.title, 'title'), r: inkRight(next.title, 'title') };
+const BACK = 'Back to Projects';
+const backInk = inkLeft(BACK, 'caption');
+---
+
+<Page title={series.title} current="projects">
+  <div class="grid head">
+    <div class="side span-4 start-1">
+      <h1 class="t-title ink-top" style={`margin-left: -${titleInk}px`}>{series.title}</h1>
+      <p class="t-caption years" style={`margin-left: -${inkLeft(series.years, 'caption')}px`}>
+        {series.years}
+      </p>
+      {
+        series.epigraph && (
+          <p class="t-text epigraph" style={`margin-left: -${epigraphInk}px`}>
+            {series.epigraph}
+          </p>
+        )
+      }
+      {
+        series.epigraphSource && (
+          <p
+            class="t-caption attribution"
+            style={`margin-left: -${inkLeft(series.epigraphSource, 'caption')}px`}>
+            {series.epigraphSource}
+          </p>
+        )
+      }
+    </div>
+
+    {
+      columns.map((column, i) => (
+        <div class:list={['statement', 'ink-top', 'span-4', i === 0 ? 'start-5' : 'start-9']}>
+          {column.map((text) => (
+            <p class="t-text">{text}</p>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="grid frames">
+    {
+      frames.map((frame, i) => (
+        <a
+          class:list={['cell', `span-${span}`]}
+          href={`/projects/${series.slug}/${frame.order}/`}
+          aria-label={`Photograph ${frame.order} of ${frames.length}`}
+          style={`--i: ${i % perRow}`}>
+          <Frame
+            file={frame.file}
+            width={frame.width}
+            height={frame.height}
+            alt={frame.alt}
+            span={span}
+            column={i % perRow}
+            priority={i < perRow}
+          />
+        </a>
+      ))
+    }
+
+    <div class:list={['wayon', `span-${span}`]}>
+      <p class="t-caption ink-top next-label" style={`margin-left: -${inkLeft('Next', 'caption')}px`}>
+        Next
+      </p>
+      <a
+        class="u t-title next-title"
+        href={`/projects/${next.slug}/`}
+        style={`margin-left: -${nextInk.l}px; --ul-l: ${nextInk.l}px; --ul-r: ${nextInk.r}px`}>
+        {next.title}
+      </a>
+      <p class="t-caption next-years" style={`margin-left: -${inkLeft(next.years, 'caption')}px`}>
+        {next.years}
+      </p>
+      <a
+        class="u t-caption back"
+        href="/projects/"
+        style={`margin-left: -${backInk}px; --ul-l: ${backInk}px`}>{BACK}</a
+      >
+    </div>
+  </div>
+</Page>
+
+<style>
+  .head {
+    row-gap: 0;
+  }
+
+  .head {
+    position: relative;
+  }
+
+  .years {
+    margin-top: 3px;
+  }
+
+  .epigraph {
+    margin-top: 115px;
+    color: var(--grey);
+  }
+
+  .attribution {
+    margin-top: 9px;
+  }
+
+  /*
+    The frames sit 75px under the SIDE column, not under the tallest of the
+    three: on D4-Series-Days the statement ends at 308 and the frames start
+    at 352, which is 75 under the attribution at 277. So the statement is
+    taken out of the row's height -- an absolutely positioned grid child is
+    still placed in its grid area, so the column arithmetic is unchanged.
+  */
+  @media (min-width: 1024px) {
+    .statement {
+      position: absolute;
+      top: 0;
+      align-self: start;
+    }
+  }
+
+  .statement {
+    --ink-cap-int: var(--cap-int-text);
+    text-wrap: pretty;
+  }
+
+  .statement p + p {
+    margin-top: var(--rhythm);
+  }
+
+  /* --- the frames ------------------------------------------------------ */
+  .frames {
+    row-gap: 20px;
+    margin-top: 75px;
+  }
+
+  .cell {
+    display: block;
+  }
+
+  /* --- the way on ------------------------------------------------------ */
+  .next-title {
+    display: block;
+    margin-top: 11px;
+    white-space: nowrap;
+  }
+
+  .next-years {
+    margin-top: 10px;
+  }
+
+  .wayon {
+    position: relative;
+  }
+
+  /* on the cell's bottom edge */
+  .back {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+  }
+
+  /* Phone: one column. The epigraph and its attribution come before the
+     statement, and nothing is bottom-aligned. */
+  @media (max-width: 1023px) {
+    .head > * {
+      grid-column: 1 / -1;
+    }
+
+    .side {
+      position: static;
+    }
+
+    .epigraph {
+      position: static;
+      margin-top: 27px;
+    }
+
+    .attribution {
+      position: static;
+      margin-top: 9px;
+    }
+
+    .statement {
+      margin-top: 27px;
+    }
+
+    /* the split is a desktop device; on one column they are one block */
+    .statement + .statement {
+      margin-top: var(--rhythm);
+    }
+
+    .frames {
+      row-gap: 12px;
+      /* D4-Phone-Series sets the frames 52 under the text, where the
+         desktop boards set them 75 under the side column */
+      margin-top: 52px;
+    }
+
+    .cell {
+      grid-column: 1 / -1;
+    }
+
+    .wayon {
+      grid-column: 1 / -1;
+      margin-top: 64px;
+    }
+
+    .back {
+      position: static;
+      display: block;
+      margin-top: 24px;
+    }
+  }
+</style>

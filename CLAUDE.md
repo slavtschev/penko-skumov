@@ -20,6 +20,13 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 ## Decisions taken in the build (step 3, Dimitar: "decide the best")
 6. Frame boxes are **derived, not fixed**: the photograph's own proportion snapped DOWN to a whole pixel, at whatever width the module comes out to. At 1440 that gives 440 x 293 and 325 x 487, where the boards draw 440 x 292 and 325 x 488. The boards are right about the intent -- an integer box, with the 0.45% of crop that costs -- but 292 is only correct at 1440. The grid is fluid with no maximum width, so at 1280 or 1600 the module is not 440 wide and the height has to follow it. A fixed number would be wrong at every width but one. `Frame.astro` takes a `boxHeight` override if a layout ever does need to fix one.
 
+## Decisions taken in the build (step 5)
+7. Series ordering for the way on follows the Projects list, skipping any series with no frames, and wraps round. Vertical Summer's next is therefore Read Between the Lines, not Days at Sea as D4-Series-Vertical draws it; the board only had the one other series page to point at.
+8. An epigraph that opens with a quotation mark is set flush to the margin, not ink-shifted -- you do not align a measure on a quote mark. One that opens with a letter is ink-aligned as usual. Both boards do this.
+9. The frames sit 75 px under the SIDE column on desktop, not under the tallest of the three modules: on D4-Series-Days the statement ends at 308 and the frames begin at 352, which is 75 under the attribution. The statement is therefore taken out of the row's height. On the phone the gap is 52, under the text.
+10. The gap between the years and the epigraph, 115 px on desktop and 27 on the phone, is taken from the boards; it follows no rule I could derive.
+11. Statement line breaks differ from D4-Series-Days. The text, measure, font and `text-wrap: pretty` are identical, but the board's own rendering breaks earlier (346 px into a 440 px measure) and runs to four lines where this runs to three. Line breaking is a rendering outcome, not a drawn decision.
+
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
 - Content in Astro content collections: `series/*` (title, years, epigraph, statement, group: projects or archive, order, cover) and `frames` (series, order, file, width, height, place, year, alt). Home edit = a list of frame ids. About, Contact as markdown or data.

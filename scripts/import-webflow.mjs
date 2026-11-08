@@ -125,6 +125,24 @@ function framesOn(html) {
  * pages; where it does not, a single short line ending in an attribution
  * is an epigraph too, and the classification is reported either way.
  */
+/** "<quote> - <who>" becomes the two, which is how the boards set them. */
+function splitEpigraph(epigraph, slug) {
+  if (!epigraph) return { epigraph: null, epigraphSource: null };
+  const m = epigraph.match(/^([\s\S]*[.!?”’"'])\s[-–—]\s(.+)$/);
+  if (!m) {
+    note(`${slug}: the epigraph carries no attribution`);
+    return { epigraph, epigraphSource: null };
+  }
+  let quote = m[1].trim();
+  // the old page opens Days at Sea's epigraph with a straight quote and
+  // closes it with a curly one; the board sets both curly
+  if (quote.startsWith('"') && quote.endsWith('”')) {
+    quote = '“' + quote.slice(1);
+    note(`${slug}: the epigraph opened with a straight quote; set curly`);
+  }
+  return { epigraph: quote, epigraphSource: m[2].trim() };
+}
+
 function prose(html, slug) {
   const raw = first(html, /<p class="paragraph">([\s\S]*?)<\/p>/);
   if (!raw) {
@@ -155,12 +173,14 @@ const seriesOut = [];
 
 for (const [index, [slug, title, years, group, source]] of SERIES.entries()) {
   let epigraph = null;
+  let epigraphSource = null;
   let statement = null;
   let files = [];
 
   if (source && existsSync(join(SRC, 'pages', `${source}.html`))) {
     const html = await page(source);
     ({ epigraph, statement } = prose(html, slug));
+    ({ epigraph, epigraphSource } = splitEpigraph(epigraph, slug));
     files = framesOn(html);
     const ownYears = text(first(html, /<div class="project-date">([\s\S]*?)<\/div>/) ?? '');
     const normalised = ownYears.replace(/\s*-\s*/g, '–');
@@ -195,6 +215,7 @@ for (const [index, [slug, title, years, group, source]] of SERIES.entries()) {
        ever prose inside a statement -- so this stays null for Penko. */
     place: null,
     epigraph,
+    epigraphSource,
     statement,
     cover: files.length ? `${slug}-01` : null,
     legacyPage: source ? `${source}.html` : null,
