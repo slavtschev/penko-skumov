@@ -115,6 +115,9 @@ export function inkTokens(): string {
     // integer: what the boards do (28/32 on a cap-top of 64 sits at 58).
     `--cap-int-${name}: ${Math.floor(capTop(name))}px;`,
   ]);
+  // how far a 12/16 caption's box sits below a 14/20 line sharing its
+  // baseline -- the viewer's bottom row is set that way
+  lines.push(`--caption-drop: ${Math.ceil(baseline('ui') - baseline('caption'))}px;`);
   return `:root{${lines.join('')}}`;
 }
 

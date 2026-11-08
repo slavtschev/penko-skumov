@@ -31,7 +31,7 @@ npx playwright install chromium   # once
 npm run build && npm run verify
 ```
 
-63 positions so far, across both tiers: the header and footer, the
+75 positions so far, across both tiers: the header and footer, the
 hamburger and the menu sheet, and every page from step 4. Where a board
 figure and the built one differ by a pixel or two the check asserts the
 built value and says why in a comment -- see decision 6 in CLAUDE.md.
@@ -50,8 +50,10 @@ Projects, About and Contact so the header links work.
 the content. The Contact wall shows the first print still; its slideshow,
 and the Home, are step 7.
 
-**Step 5** -- the eleven series pages and their grids. Each frame links to
-its viewer URL, which step 6 builds, so those links 404 until then.
+**Step 5** -- the eleven series pages and their grids.
+
+**Step 6** -- the viewer: a page per frame, so Back closes. Keys, click,
+swipe, prefetched neighbours, no wrap.
 
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted

@@ -12,9 +12,11 @@ interface Props {
   current?: NavKey;
   /** The Home carries no footer. */
   footer?: boolean;
+  /** The viewer carries no header: its counter and Close are the top row. */
+  header?: boolean;
 }
 
-const { title, current, footer = true } = Astro.props;
+const { title, current, footer = true, header = true } = Astro.props;
 const documentTitle = footer ? `${title} — Penko Skumov` : title;
 ---
 
@@ -31,9 +33,13 @@ const documentTitle = footer ? `${title} — Penko Skumov` : title;
     <style set:html={gridTokens() + inkTokens()}></style>
   </head>
   <body>
-    <Header current={current}>
-      <Footer slot="sheet-footer" variant="sheet" />
-    </Header>
+    {
+      header && (
+        <Header current={current}>
+          <Footer slot="sheet-footer" variant="sheet" />
+        </Header>
+      )
+    }
 
     <main class="site-main page">
       <slot />

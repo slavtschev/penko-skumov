@@ -119,6 +119,22 @@ const CHECKS = [
   ['390 statement', 'days-at-sea', 390, '.statement', (b) => [b.x, b.y, b.w], [20, 244, 350]],
   ['390 first frame', 'days-at-sea', 390, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [20, 744, 350, 233]],
 
+  /* step 6 -- D4-Viewer-1, D4-Viewer-2, D4-Phone-Viewer-1. The plate is
+     fitted from each photograph's real ratio (1.4995, not an exact 3:2),
+     so it lands a pixel off the board's drawn 984 x 656. */
+  ['1440 viewer plate', 'viewer', 1440, '.plate .box', (b) => [b.x, b.w], [228, 984]],
+  ['1440 viewer counter', 'viewer', 1440, '.counter', (b) => [b.x, b.y], [40, 25]],
+  ['1440 viewer Close', 'viewer', 1440, '.viewer-close', (b) => [b.right, b.y], [1400, 22]],
+  ['1440 viewer caption', 'viewer', 1440, '.caption', (b) => [b.x, b.y], [39, 749]],
+  ['1440 viewer controls', 'viewer', 1440, '.controls', (b) => [b.right, b.y], [1400, 746]],
+  ['1440 portrait plate', 'viewer-portrait', 1440, '.plate .box', (b) => [b.x, b.w], [501, 437]],
+  ['1440 portrait caption', 'viewer-portrait', 1440, '.caption', (b) => [b.x, b.y], [40, 749]],
+  ['390 viewer plate full bleed', 'viewer', 390, '.plate .box', (b) => [b.x, b.w], [0, 390]],
+  ['390 viewer counter', 'viewer', 390, '.counter', (b) => [b.x, b.y], [20, 25]],
+  ['390 viewer Close', 'viewer', 390, '.viewer-close', (b) => [b.right, b.y], [370, 22]],
+  ['390 viewer caption', 'viewer', 390, '.caption', (b) => [b.x, b.y], [19, 793]],
+  ['390 viewer controls', 'viewer', 390, '.controls', (b) => [b.right, b.y], [370, 790]],
+
   /* step 4 -- D4-404 */
   ['1440 404 h1', '404', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
   ['1440 404 sentence', '404', 1440, '.aside p', (b) => [b.x, b.y, b.w], [500, 56, 440]],
@@ -151,16 +167,34 @@ const browser = await chromium.launch(
 );
 let failed = 0;
 
-for (const width of [1440, 390]) {
-  // tall enough that no page scrolls, which would narrow the content box
-  const height = width === 1440 ? 2200 : 2600;
-  const page = await browser.newPage({ viewport: { width, height }, deviceScaleFactor: 1 });
+/* Pages are measured in a window tall enough that none of them scroll,
+   which would narrow the content box. The viewer is the exception: it is
+   sized to the window itself, so it has to be measured at the height its
+   board is drawn at. */
+const VIEWPORT_PAGES = new Set(['viewer', 'viewer-portrait']);
+const tall = (width) => (width === 1440 ? 2200 : 2600);
+const windowed = (width) => (width === 1440 ? 800 : 844);
 
-  const PAGES = ['home', 'projects', 'about', 'contact', '404', 'days-at-sea', 'vertical-summer'];
-  for (const name of PAGES) {
-    const path =
-      name === 'home' ? '' : name === '404' ? '404.html'
-      : name.includes('-') ? `projects/${name}/` : `${name}/`;
+for (const width of [1440, 390]) {
+  const page = await browser.newPage({ viewport: { width, height: tall(width) }, deviceScaleFactor: 1 });
+
+  const ROUTES = {
+    home: '',
+    projects: 'projects/',
+    about: 'about/',
+    contact: 'contact/',
+    '404': '404.html',
+    'days-at-sea': 'projects/days-at-sea/',
+    'vertical-summer': 'projects/vertical-summer/',
+    /* the two frames the viewer boards draw */
+    viewer: 'projects/days-at-sea/6/',
+    'viewer-portrait': 'projects/vertical-summer/8/',
+  };
+  for (const [name, path] of Object.entries(ROUTES)) {
+    await page.setViewportSize({
+      width,
+      height: VIEWPORT_PAGES.has(name) ? windowed(width) : tall(width),
+    });
     await page.goto(`http://localhost:${PORT}/${path}`, { waitUntil: 'load' });
     await page.evaluate(() => document.fonts.ready);
     // photographs dissolve in; measure the settled page

@@ -27,6 +27,12 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 10. The gap between the years and the epigraph, 115 px on desktop and 27 on the phone, is taken from the boards; it follows no rule I could derive.
 11. Statement line breaks differ from D4-Series-Days. The text, measure, font and `text-wrap: pretty` are identical, but the board's own rendering breaks earlier (346 px into a 440 px measure) and runs to four lines where this runs to three. Line breaking is a rendering outcome, not a drawn decision.
 
+## Decisions taken in the build (step 6)
+12. The viewer is a page per frame, not an overlay: the handoff asks for a URL per frame and for Back to close, which a page gives for nothing. It carries no site header -- the counter and Close are its top row, as all four boards draw it -- so `Page.astro` gained a `header` prop beside `footer`.
+13. Focus to Close on open, a focus trap, and locking the page behind are overlay behaviours and are NOT in yet. On a page of its own the keys work wherever focus is, Close is already first in tab order, and focusing it on load rings it for everyone who arrived with a mouse. They belong with step 9, when the viewer can open over the series page; the same goes for the 600 ms dissolve between frames, which needs a router.
+14. The caption reads "<place>, <year>" and carries the series link beside it. Where the place is unknown -- every frame, until Penko supplies them -- it falls back to "<series>, <years>" and the link is left off, because the caption already says the name. That is what D4-Viewer-2 draws for Vertical Summer.
+15. On the phone the photograph goes full bleed, as D4-Phone-Viewer-1 draws it, rather than 100vw less the margins: a margin there costs a third of the picture.
+
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
 - Content in Astro content collections: `series/*` (title, years, epigraph, statement, group: projects or archive, order, cover) and `frames` (series, order, file, width, height, place, year, alt). Home edit = a list of frame ids. About, Contact as markdown or data.
