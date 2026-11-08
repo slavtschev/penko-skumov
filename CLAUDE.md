@@ -10,6 +10,13 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 3. Phone menu: **list at the top** (as drawn in D4-Phone-Menu).
 4. Defaults I chose (veto freely): the shelf stage (hung from the left margin, not centred); the quotation shown whole, held **36 s** (not the drawn 24 s: 133 words need about 32 to 40 s), so the round is **108 s**; quotation at slide 6; the burning car stays out of the Home edit; no footer on the Home.
 
+## Decisions taken in the build (step 1, Dimitar: "you decide")
+1. Underline offset: the **boards** win over this file. The rule sits at `bottom` 1 px (14/20), -1 px (12/16), 2 px (28/32) inside the line box, which is 2.2 to 3.4 px below the baseline and follows no single distance. "4 px below the text" above is superseded; it did not match any board.
+2. Page titles: `Projects — Penko Skumov`, em dash, the Home just `Penko Skumov`.
+3. Close on the menu sheet gets the hamburger's 64 x 48 hit area (the 44 px touch-target rule) with its ink still at top 22, right on the margin. The sheet also traps Tab, closes on Escape, returns focus to the hamburger and locks scroll behind it — beyond what the board draws, but what a full-screen sheet needs. Revisit at step 8.
+4. Ink alignment is derived, never typed in: `scripts/font-metrics.py` writes `src/lib/satoshi-metrics.json`, `src/lib/ink.ts` does the arithmetic. Horizontal offsets truncate, vertical line-box tops round up; those two rules reproduce every offset on the boards. A typeface swap re-measures itself.
+5. `font-display: block`, not swap: a fallback face would move every ink-aligned line 1 to 2 px under the reader.
+
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
 - Content in Astro content collections: `series/*` (title, years, epigraph, statement, group: projects or archive, order, cover) and `frames` (series, order, file, width, height, place, year, alt). Home edit = a list of frame ids. About, Contact as markdown or data.
