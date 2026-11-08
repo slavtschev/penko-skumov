@@ -8,7 +8,9 @@
     "preview": "astro preview",
     "check": "astro check",
     "metrics": "python3 scripts/font-metrics.py public/fonts",
-    "verify": "node scripts/verify.mjs"
+    "verify": "node scripts/verify.mjs",
+    "source": "node scripts/fetch-source.mjs",
+    "import": "node scripts/import-webflow.mjs"
   },
   "dependencies": {
     "astro": "7.4.7"

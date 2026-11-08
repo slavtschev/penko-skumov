@@ -1,0 +1,120 @@
+{
+ "home": {
+  "quotation": "“The photographer’s wandering is a metaphor for the road as an adventure; it is a journey through which the wonders of the world are revealed. It is a metaphor for ordinary life – a life that we experience with our eyes wide open, looking for the extraordinary. Meandering the streets of the world, the photographer is a drifter who drinks up faces, gestures, light and shadow, and always encounters familiar places afresh. Nothing stays the same in the flow of time. In this sense, photography is a tool for unravelling the mysteries of the world and the spirit of the times. It is an ‘armed eye’ that manages to see into the flash of the moment that there is something beyond banality, beyond nonsense and more than is visible to the ‘naked eye.’”",
+  "quotationSource": null,
+  "slides": [
+   {
+    "n": 1,
+    "kind": "photograph",
+    "caption": "Sunny Beach, Bulgaria, 2020",
+    "series": null,
+    "file": "Sunny-Beach-May-2020.jpg",
+    "width": 1600,
+    "height": 1066
+   },
+   {
+    "n": 2,
+    "kind": "photograph",
+    "caption": "Vertical Summer, 2023",
+    "series": "vertical-summer",
+    "file": null,
+    "width": null,
+    "height": null
+   },
+   {
+    "n": 3,
+    "kind": "photograph",
+    "caption": "Pomorie, Bulgaria, 2021",
+    "series": null,
+    "file": "Pomorie_August_2021.jpg",
+    "width": 1600,
+    "height": 1067
+   },
+   {
+    "n": 4,
+    "kind": "photograph",
+    "caption": "London, United Kingdom, 2019",
+    "series": "six-days-on-an-island",
+    "file": null,
+    "width": null,
+    "height": null
+   },
+   {
+    "n": 5,
+    "kind": "photograph",
+    "caption": "Rhodope Mountains, Bulgaria, 2019",
+    "series": null,
+    "file": "Rhodope-mountains-May-2019.jpg",
+    "width": 1600,
+    "height": 1067
+   },
+   {
+    "n": 6,
+    "kind": "quotation"
+   },
+   {
+    "n": 7,
+    "kind": "photograph",
+    "caption": "Sofia, Bulgaria, 2019",
+    "series": null,
+    "file": "Sofia-13-July-2019.jpg",
+    "width": 1600,
+    "height": 1066
+   },
+   {
+    "n": 8,
+    "kind": "photograph",
+    "caption": "Bucharest, Romania, 2019",
+    "series": null,
+    "file": "Bucharest-15-September-2019.jpg",
+    "width": 1600,
+    "height": 1067
+   },
+   {
+    "n": 9,
+    "kind": "photograph",
+    "caption": "Sofia, Bulgaria, 2020",
+    "series": null,
+    "file": "Sofia-September-2020.jpg",
+    "width": 1600,
+    "height": 1067
+   },
+   {
+    "n": 10,
+    "kind": "photograph",
+    "caption": "Pomorie, Bulgaria, 2017",
+    "series": null,
+    "file": "Penko_Skumov_Pomorie_August_2017.jpg",
+    "width": 1600,
+    "height": 1058
+   },
+   {
+    "n": 11,
+    "kind": "photograph",
+    "caption": "Vertical Summer, 2023",
+    "series": "vertical-summer",
+    "file": null,
+    "width": null,
+    "height": null
+   },
+   {
+    "n": 12,
+    "kind": "photograph",
+    "caption": "Pomorie, Bulgaria, 2018–2020",
+    "series": "days-at-sea",
+    "file": null,
+    "width": null,
+    "height": null
+   },
+   {
+    "n": 13,
+    "kind": "photograph",
+    "caption": "Pomorie, Bulgaria, 2018–2020",
+    "series": "days-at-sea",
+    "file": null,
+    "width": null,
+    "height": null
+   }
+  ]
+ }
+}

@@ -35,16 +35,18 @@ Step 1 asserts 15 positions: the name, the nav's right edge, an ink-aligned
 h1, both footer lines at both tiers, the three hamburger rules, the three
 menu words, Close, and that the Home carries no footer.
 
-## What is here (build step 1)
+## What is here (build steps 1 and 2)
 
-Fonts, tokens, the base layout, the header -- with the phone hamburger and
-menu sheet -- and the footer, plus placeholder pages for Projects, About and
-Contact so the header links work. Nothing else: the real pages arrive at
-steps 4 onwards.
+**Step 1** -- fonts, tokens, the base layout, the header (with the phone
+hamburger and menu sheet) and the footer, plus placeholder pages for
+Projects, About and Contact so the header links work.
+
+**Step 2** -- the content collections and the import that fills them. The
+real pages arrive at steps 4 onwards.
 
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted
-scripts/             font-metrics.py, which writes the metrics table below
+scripts/             font-metrics.py, fetch-source.mjs, import-webflow.mjs
 src/styles/
   tokens.css         grid tiers, type sizes, colour, motion durations
   base.css           @font-face, reset, state, type styles, grid utilities
@@ -52,6 +54,8 @@ src/lib/
   satoshi-metrics.json   generated: cap height, ascent, side bearings
   ink.ts                 cap-top, baseline and side-bearing arithmetic
   nav.ts                 Projects, About, Contact
+src/content.config.ts   the series, frames and home schemas
+src/content/           generated: series/*.json, frames.json, home.json
 src/layouts/Page.astro
 src/components/        Header.astro, Footer.astro
 src/pages/             index, projects, about, contact
@@ -114,3 +118,36 @@ in Arial first would move the text 1 to 2 px under the reader. The files are
 The files came from the Fontshare webfont bundle already in this repository
 (`dist/Satoshi WEB/`). **The self-hosting licence is still unconfirmed** --
 the handoff asks for it to be checked before launch.
+
+## Content
+
+`src/content/` is generated. Do not hand-edit it -- the import overwrites it.
+
+```
+npm run source   # mirror penkoskumov.com into source/  (once)
+npm run import   # source/ -> src/content/
+```
+
+`fetch-source.mjs` mirrors the old site's 16 pages and reads each
+photograph's intrinsic size from its JPEG header over a range request, a
+couple of KB each rather than ~200MB of photographs. Behind a proxy, prefix
+`NODE_USE_ENV_PROXY=1`.
+
+The handoff names the Webflow export on Dimitar's machine as the source.
+This uses the live site, which is the same content and newer -- the June
+2025 export has no Flat World page. If you have the export, skip
+`npm run source` and point the import at it: same page names, same
+`images/` folder.
+
+**The import never invents content.** Where the old site has no answer the
+field is written as `null` and counted in the report it prints at the end.
+That report is the list to take back to Penko.
+
+Three things the import corrects, rather than carrying the old site's bugs
+into the new one (`scripts/source-fixes.mjs`, and the series table at the
+top of `import-webflow.mjs`):
+
+* series titles and date ranges come from the boards, not the old pages,
+  which disagree with themselves ("Days at sea", "2018 - 2020");
+* `07_Saint.jpg` is really `07_Saints.jpg` -- the old reference 404s;
+* the Archive's Lith Prints thumbnail points at a `.jpg.png` that 404s.
