@@ -33,6 +33,12 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 14. The caption reads "<place>, <year>" and carries the series link beside it. Where the place is unknown -- every frame, until Penko supplies them -- it falls back to "<series>, <years>" and the link is left off, because the caption already says the name. That is what D4-Viewer-2 draws for Vertical Summer.
 15. On the phone the photograph goes full bleed, as D4-Phone-Viewer-1 draws it, rather than 100vw less the margins: a margin there costs a third of the picture.
 
+## Decisions taken in the build (step 7)
+16. Five of the thirteen Home slides are named on the board only by the picture, so the edit has no file for them. Each takes the next unused frame from the series the board names, rather than being dropped: dropping them would have cost the 13-slide shape and the 108-second round. They are stand-ins and the import's report lists them for Penko.
+17. The nine-column plate needs a `+1px` in its height cap. Frame floors the box height, so a width W fits an available height H whenever `floor(W / ratio) <= H`, which admits anything below `(H + 1) * ratio`. Without it the cap bites a fraction early and the plate comes out 1013 where the board draws 1015.
+18. The Contact frame and mat are sized in `cqw` against the wall, not in percentages of the frame. A percentage resolves against the frame's own width, which gave the portrait print a 29px mat where the board has 40 on both orientations.
+19. A bare `/` between two `{...}` expressions in an Astro template makes the language server read the rest of the file as TypeScript -- 75 phantom errors, in the CSS and the script. The build is unaffected. Written as one expression instead.
+
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
 - Content in Astro content collections: `series/*` (title, years, epigraph, statement, group: projects or archive, order, cover) and `frames` (series, order, file, width, height, place, year, alt). Home edit = a list of frame ids. About, Contact as markdown or data.

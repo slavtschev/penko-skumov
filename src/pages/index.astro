@@ -1,8 +1,300 @@
 ---
+import { getCollection, getEntry } from 'astro:content';
+import Frame from '../components/Frame.astro';
 import Page from '../layouts/Page.astro';
+import { inkLeft, inkRight } from '../lib/ink';
+
+/* D4-Home. Thirteen slides in a fixed order, each hung from the left
+   margin and standing on one line. The caption, counter and controls sit
+   below that line. Nothing scrolls; no footer. */
+
+const home = (await getEntry('home', 'home'))!.data;
+const seriesEntries = await getCollection('series');
+const frames = await getCollection('frames');
+
+const seriesOf = (slug: string | null) =>
+  slug ? seriesEntries.find((s) => s.data.slug === slug)?.data : undefined;
+
+/*
+ * Five of the thirteen slides are named on the board only by the picture
+ * -- two Vertical Summer portraits, one Six Days on an Island, two Days
+ * at Sea -- so the edit has no file for them. Rather than drop them, and
+ * with them the 13-slide shape and the 108-second round, each takes the
+ * next unused frame from the series the board names. The import's report
+ * lists them for Penko to choose properly.
+ */
+const taken = new Map<string, number>();
+const slides = home.slides.map((slide) => {
+  if (slide.kind === 'quotation') {
+    return { ...slide, series: undefined, width: null, height: null, portrait: false, standIn: false };
+  }
+  const series = seriesOf(slide.series);
+  let frame = slide.file ? frames.find((f) => f.data.file === slide.file)?.data : undefined;
+  let standIn = false;
+  if (!frame && slide.series) {
+    const own = frames
+      .filter((f) => f.data.series === slide.series)
+      .sort((a, b) => a.data.order - b.data.order)
+      .map((f) => f.data);
+    const used = taken.get(slide.series) ?? 0;
+    frame = own[used % own.length];
+    taken.set(slide.series, used + 1);
+    standIn = true;
+  }
+  const width = slide.width ?? frame?.width ?? null;
+  const height = slide.height ?? frame?.height ?? null;
+  return {
+    ...slide,
+    file: slide.file ?? frame?.file ?? null,
+    series,
+    width,
+    height,
+    /* worked out here: a `>` inside a template expression confuses the
+       Astro language server into parsing the rest of the file as TS */
+    portrait: Boolean(width && height && height > width),
+    standIn,
+  };
+});
+
+const count = slides.length;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const CONTROLS = ['Previous', 'Pause', 'Next'] as const;
+const navInkRight = inkRight('Next', 'ui');
 ---
 
 <Page title="Penko Skumov" footer={false}>
   <h1 class="visually-hidden">Penko Skumov</h1>
-  <p class="t-caption ink-top">Home: the slideshow arrives at build step 7.</p>
+
+  <div class="show" data-count={count}>
+    <div class="stage">
+      {
+        slides.map((slide, i) =>
+          slide.kind === 'quotation' ? (
+            <blockquote class="slide quote" data-slide={i} hidden>
+              <p>{home.quotation}</p>
+            </blockquote>
+          ) : (
+            <div
+              class:list={['slide', 'plate', slide.portrait && 'portrait']}
+              data-slide={i}
+              hidden
+              style={`--plate-ratio: ${+(slide.width! / slide.height!).toFixed(6)}`}>
+              <Frame
+                file={slide.file!}
+                width={slide.width!}
+                height={slide.height!}
+                alt={slide.caption}
+                span={slide.portrait ? 4 : 9}
+                priority={i === 0}
+              />
+            </div>
+          ),
+        )
+      }
+    </div>
+
+    <div class="line grid">
+      {
+        slides.map((slide, i) => (
+          <p class="t-caption caption span-2 start-1" data-caption={i} hidden={i !== 0}>
+            {slide.kind === 'quotation' ? '' : slide.caption}
+          </p>
+        ))
+      }
+      {
+        slides.map((slide, i) =>
+          slide.kind !== 'quotation' && slide.series ? (
+            <a
+              class="u t-caption series-link span-4 start-3"
+              href={`/projects/${slide.series.slug}/`}
+              data-link={i}
+              hidden={i !== 0}
+              style={`--ul-l: ${inkLeft(slide.series.title, 'caption')}px; margin-left: -${inkLeft(slide.series.title, 'caption')}px`}>
+              {slide.series.title}
+            </a>
+          ) : null,
+        )
+      }
+
+      <p class="t-caption counter span-2 start-10" id="counter">{`${pad(1)} / ${pad(count)}`}</p>
+
+      <nav class="controls t-ui span-3 start-10" aria-label="Slideshow" style={`margin-right: -${navInkRight}px`}>
+        {
+          CONTROLS.map((label) => (
+            <button type="button" class="u control" data-control={label.toLowerCase()}>
+              {label}
+            </button>
+          ))
+        }
+      </nav>
+    </div>
+  </div>
 </Page>
+
+<style>
+  /* The window, exactly: nothing on the Home scrolls. */
+  .show {
+    position: relative;
+    height: calc(100svh - var(--header));
+    /* where the slides stand, measured up from the foot of the window */
+    --line: 60px;
+  }
+
+  .stage {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: var(--line);
+  }
+
+  .slide {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    opacity: 0;
+    transition: opacity 600ms var(--timing);
+  }
+
+  .slide[hidden] {
+    display: none;
+  }
+
+  /*
+    A plate is nine columns, or four for a portrait, with its height
+    derived from that width and its foot on the line. It shrinks only
+    when the window is too short for the module to fit.
+
+    The +1px is not a fudge: Frame floors the height, so a width W fits an
+    available height H whenever floor(W / ratio) <= H, which admits
+    anything below (H + 1) * ratio. Without it the cap would bite a
+    fraction early and the nine-column plate would come out 1013 instead
+    of the 1015 the board draws.
+  */
+  .plate {
+    --fits: calc((100svh - var(--header) - var(--line) + 1px) * var(--plate-ratio) - 0.01px);
+    width: min(calc(9 * var(--col) + 8 * var(--gutter)), var(--fits));
+  }
+
+  .plate.portrait {
+    width: min(calc(4 * var(--col) + 3 * var(--gutter)), var(--fits));
+  }
+
+  /* The quotation is seven columns, and its last baseline sits on the
+     line the plates stand on. */
+  .quote {
+    width: calc(7 * var(--col) + 6 * var(--gutter));
+    margin: 0;
+    font: 400 var(--title-size) / var(--title-line) var(--family);
+    letter-spacing: var(--title-tracking);
+    text-wrap: pretty;
+    bottom: calc(var(--line) - (var(--title-line) - var(--base-title)));
+  }
+
+  .quote p {
+    margin: 0;
+  }
+
+  /* --- the line below the slides -------------------------------------- */
+  /* the caption sits 8 under the line the slides stand on */
+  .line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% - var(--line) + var(--caption-gap));
+    align-items: start;
+    row-gap: 0;
+  }
+
+  .caption,
+  .series-link,
+  .counter {
+    white-space: nowrap;
+  }
+
+  .caption[hidden],
+  .series-link[hidden] {
+    display: none;
+  }
+
+  /* the counter and the controls share the caption's line; without an
+     explicit row their overlapping columns push one onto the next */
+  .caption,
+  .series-link,
+  .counter,
+  .controls {
+    grid-row: 1;
+  }
+
+  .counter {
+    grid-column: 10 / 12;
+  }
+
+  .controls {
+    grid-column: 10 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--nav-gap);
+    /* the 14/20 controls share the 12/16 caption's baseline, which puts
+       their taller box three pixels higher */
+    margin-top: calc(-1 * var(--caption-drop));
+  }
+
+  .control {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  @media (max-width: 767px) {
+    .show {
+      --line: 75px;
+    }
+
+    .plate,
+    .plate.portrait {
+      width: 100%;
+    }
+
+    .quote {
+      width: 100%;
+      font: 400 var(--text-size) / var(--text-line) var(--family);
+      letter-spacing: 0;
+      bottom: calc(var(--line) - (var(--text-line) - var(--base-text)));
+    }
+
+    /* caption left and counter right on the first line, controls below */
+    .caption {
+      grid-column: 1 / 3;
+    }
+
+    .series-link {
+      display: none;
+    }
+
+    .counter {
+      grid-column: 3 / -1;
+      justify-self: end;
+    }
+
+    .controls {
+      grid-column: 1 / -1;
+      /* the controls take their own line, 13 under the caption's */
+      position: absolute;
+      top: 13px;
+      right: 0;
+      margin-top: 0;
+    }
+  }
+</style>
+
+<script>
+  import { initHome } from '../lib/home-slideshow';
+
+  initHome();
+</script>

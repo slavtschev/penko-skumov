@@ -135,6 +135,17 @@ const CHECKS = [
   ['390 viewer caption', 'viewer', 390, '.caption', (b) => [b.x, b.y], [19, 793]],
   ['390 viewer controls', 'viewer', 390, '.controls', (b) => [b.right, b.y], [370, 790]],
 
+  /* step 7 -- D4-Home and D4-Phone-Home-1. Measured on the first slide,
+     which is up for six seconds. */
+  ['1440 home plate', 'home', 1440, '.slide[data-slide="0"] .box', (b) => [b.x, b.y, b.w, b.h], [40, 64, 1015, 676]],
+  ['1440 home caption', 'home', 1440, '[data-caption="0"]', (b) => [b.x, b.y], [40, 748]],
+  ['1440 home counter', 'home', 1440, '#counter', (b) => [b.x, b.y], [1075, 748]],
+  ['1440 home controls', 'home', 1440, '.controls', (b) => [b.right, b.y], [1400, 745]],
+  ['390 home plate', 'home', 390, '.slide[data-slide="0"] .box', (b) => [b.x, b.y, b.w, b.h], [20, 536, 350, 233]],
+  ['390 home caption', 'home', 390, '[data-caption="0"]', (b) => [b.x, b.y], [20, 777]],
+  ['390 home counter', 'home', 390, '#counter', (b) => [b.right, b.y], [370, 777]],
+  ['390 home controls', 'home', 390, '.controls', (b) => [b.right, b.y], [370, 790]],
+
   /* step 4 -- D4-404 */
   ['1440 404 h1', '404', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
   ['1440 404 sentence', '404', 1440, '.aside p', (b) => [b.x, b.y, b.w], [500, 56, 440]],
@@ -171,7 +182,7 @@ let failed = 0;
    which would narrow the content box. The viewer is the exception: it is
    sized to the window itself, so it has to be measured at the height its
    board is drawn at. */
-const VIEWPORT_PAGES = new Set(['viewer', 'viewer-portrait']);
+const VIEWPORT_PAGES = new Set(['viewer', 'viewer-portrait', 'home']);
 const tall = (width) => (width === 1440 ? 2200 : 2600);
 const windowed = (width) => (width === 1440 ? 800 : 844);
 

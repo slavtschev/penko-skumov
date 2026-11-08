@@ -55,36 +55,55 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     <section class="wallside span-8 start-1" aria-label="Fine art prints">
       <div class="wall">
         {
-          first.frame && (
-            <figure class="print" data-portrait={first.portrait ? '' : undefined}>
-              <a class="fr" href={first.href} aria-label={`${first.caption}, ${first.title}`}>
-                <span class="mat">
-                  <span class="ph">
-                    <Frame
-                      file={first.frame.file}
-                      width={first.frame.width}
-                      height={first.frame.height}
-                      alt={null}
-                      span={4}
-                    />
+          prints.map((print, i) =>
+            print.frame ? (
+              <figure
+                class="print slide"
+                data-slide={i}
+                data-portrait={print.portrait ? '' : undefined}
+                hidden>
+                <a class="fr" href={print.href} aria-label={`${print.caption}, ${print.title}`}>
+                  <span class="mat">
+                    <span class="ph">
+                      <Frame
+                        file={print.frame.file}
+                        width={print.frame.width}
+                        height={print.frame.height}
+                        alt={null}
+                        span={4}
+                        priority={i === 0}
+                      />
+                    </span>
                   </span>
-                </span>
-              </a>
-              <figcaption class="plaque t-caption">
-                <span class="size">Fine art print, {first.size}</span>
-                <span class="count">
-                  {String(first.n).padStart(2, '0')} / {String(prints.length).padStart(2, '0')}
-                </span>
-              </figcaption>
-            </figure>
+                </a>
+                <figcaption class="plaque t-caption">
+                  <span class="size">Fine art print, {print.size}</span>
+                  <span class="count">
+                    {`${String(print.n).padStart(2, '0')} / ${String(prints.length).padStart(2, '0')}`}
+                  </span>
+                </figcaption>
+              </figure>
+            ) : null,
           )
         }
         <div class="progress"></div>
       </div>
 
       <div class="wallcap t-caption">
-        <span>{first.caption}</span>
-        <a class="u what" href={first.href}>{first.title}</a>
+        {
+          prints.map((print, i) => (
+            <span class="where" data-where={i} hidden={i !== 0}>
+              {print.caption}
+            </span>
+          ))
+        }
+        {
+          prints.map((print, i) => (
+            <a class="u what" href={print.href} data-what={i} hidden={i !== 0}>
+              {print.title}
+            </a>
+          ))
+        }
       </div>
     </section>
 
@@ -121,6 +140,10 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
   /* --- the wall -------------------------------------------------------- */
   .wall {
     position: relative;
+    /* so the moulding and the mat can be sized against the wall rather
+       than against the frame, which is what the board does: 12 and 40 on
+       both orientations, not a share of each frame's own width */
+    container-type: inline-size;
     /* 900 x 700 at the L tier, which is 8 columns by its own proportion */
     aspect-ratio: 900 / 700;
     background: #ebebea;
@@ -132,6 +155,16 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     margin: 0;
     display: grid;
     place-items: center;
+    opacity: 0;
+    transition: opacity var(--dissolve) var(--timing);
+  }
+
+  .print[hidden] {
+    display: none;
+  }
+
+  .wallcap [hidden] {
+    display: none;
   }
 
   /* The frame: a black moulding, a deep mat, then the print. The soft
@@ -139,22 +172,22 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
   .fr {
     display: block;
     box-sizing: border-box;
-    padding: 1.333%;
+    padding: 1.333cqw;
     background: #131313;
     box-shadow:
       0 1px 1px rgba(17, 17, 17, 0.14),
       6px 14px 22px -10px rgba(17, 17, 17, 0.38);
-    width: 64.9%;
+    width: 64.9cqw;
   }
 
   .print[data-portrait] .fr {
-    width: 47.1%;
+    width: 47.1cqw;
   }
 
   .mat {
     display: block;
     box-sizing: border-box;
-    padding: 7.2%;
+    padding: 4.444cqw;
     background: #fbfbf9;
   }
 
@@ -185,7 +218,8 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     white-space: nowrap;
   }
 
-  /* one step per print; step 7 drives it, here it is simply full */
+  /* a 1px rule across the foot of the wall, filling in six steps over the
+     six seconds a print is up, and holding while the pointer is on it */
   .progress {
     position: absolute;
     left: 0;
@@ -193,6 +227,35 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     bottom: 0;
     height: 1px;
     background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+  }
+
+  .progress.running {
+    animation: fill 6s steps(6, end) forwards;
+  }
+
+  .wall:hover .progress {
+    animation-play-state: paused;
+  }
+
+  @keyframes fill {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress.running {
+      animation: none;
+    }
+
+    .progress {
+      transform: scaleX(1);
+    }
   }
 
   .wallcap {
@@ -201,6 +264,10 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     gap: 20px;
     margin-top: var(--caption-gap);
     white-space: nowrap;
+  }
+
+  .wallcap .where {
+    margin-left: -1px;
   }
 
   .wallcap .what {
@@ -280,3 +347,9 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     }
   }
 </style>
+
+<script>
+  import { initPrints } from '../lib/print-slideshow';
+
+  initPrints();
+</script>

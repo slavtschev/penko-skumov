@@ -31,7 +31,7 @@ npx playwright install chromium   # once
 npm run build && npm run verify
 ```
 
-75 positions so far, across both tiers: the header and footer, the
+83 positions so far, across both tiers: the header and footer, the
 hamburger and the menu sheet, and every page from step 4. Where a board
 figure and the built one differ by a pixel or two the check asserts the
 built value and says why in a comment -- see decision 6 in CLAUDE.md.
@@ -54,6 +54,9 @@ and the Home, are step 7.
 
 **Step 6** -- the viewer: a page per frame, so Back closes. Keys, click,
 swipe, prefetched neighbours, no wrap.
+
+**Step 7** -- the Home slideshow and the Contact wall, on one engine
+(`src/lib/slideshow.ts`).
 
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted
