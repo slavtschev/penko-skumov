@@ -9,6 +9,7 @@
     "check": "astro check",
     "metrics": "python3 scripts/font-metrics.py public/fonts",
     "verify": "node scripts/verify.mjs",
+    "overlaps": "node scripts/overlaps.mjs",
     "source": "node scripts/fetch-source.mjs",
     "import": "node scripts/import-webflow.mjs",
     "source:images": "node scripts/fetch-source.mjs --images"

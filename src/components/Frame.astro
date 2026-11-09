@@ -111,6 +111,15 @@ if (!src) {
     --frame-opacity: 1;
   }
 
+  /* A photograph already decoded when the page runs -- from the cache, a
+     prerender, a step back -- did not arrive, so it is a cut, not a
+     dissolve. Without this every return to a page fades in again, which
+     is what made the viewer feel slow to open. */
+  .frame.cut {
+    --frame-dissolve: var(--cut);
+    --frame-delay: 0ms;
+  }
+
   /* pointer devices only: the frame to 80%, over 300ms */
   @media (hover: hover) and (pointer: fine) {
     .frame.in:hover {
@@ -171,6 +180,8 @@ if (!src) {
     const img = frame.querySelector('img');
     if (!img) continue;
     if (img.complete && img.naturalWidth > 0) {
+      /* already on screen as far as the reader is concerned: cut it in */
+      frame.classList.add('cut');
       reveal(frame);
       continue;
     }

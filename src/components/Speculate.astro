@@ -1,0 +1,26 @@
+---
+/**
+ * Prerender the page under the pointer.
+ *
+ * The viewer is a page of its own (build decision 12), so opening a
+ * photograph is a navigation: the reader waits for a document and then
+ * for a full-window image that the grid's 440px variant did not cache.
+ * `data-astro-prefetch` fetches the document on hover; this fetches and
+ * renders the whole page, images included, so the step is a cut.
+ *
+ * Chromium only -- Safari and Firefox ignore the script and fall back to
+ * Astro's hover prefetch. `moderate` means on hover, two at a time.
+ */
+interface Props {
+  /** URL pattern to speculate on, e.g. "/projects/*" */
+  match: string;
+}
+
+const { match } = Astro.props;
+
+const rules = {
+  prerender: [{ where: { href_matches: match }, eagerness: 'moderate' }],
+};
+---
+
+<script type="speculationrules" is:inline set:html={JSON.stringify(rules)} />

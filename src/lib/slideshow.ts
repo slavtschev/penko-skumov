@@ -48,11 +48,11 @@ const reduced = () =>
 export function slideshow(options: SlideshowOptions): Slideshow {
   const {
     slides,
-    inMs = 600,
-    outMs = 600,
-    firstInMs = 1000,
+    inMs = 300,
+    outMs = 300,
+    firstInMs = 600,
     manualOutMs = 300,
-    manualInMs = 600,
+    manualInMs = 300,
     onChange,
     preload,
   } = options;

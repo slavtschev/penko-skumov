@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import Frame from '../../components/Frame.astro';
 import Page from '../../layouts/Page.astro';
+import Speculate from '../../components/Speculate.astro';
 import { inkLeft, inkRight } from '../../lib/ink';
 import { firstSentence } from '../../lib/site';
 
@@ -96,12 +97,13 @@ const backInk = inkLeft(BACK, 'caption');
     }
   </div>
 
-  <div class="grid frames">
+  <div class="grid frames" style={`--series-ratio: ${+(frames[0].width / frames[0].height).toFixed(6)}`}>
     {
       frames.map((frame, i) => (
         <a
           class:list={['cell', `span-${span}`]}
           href={`/projects/${series.slug}/${frame.order}/`}
+          data-astro-prefetch
           aria-label={`Photograph ${frame.order} of ${frames.length}`}
           style={`--i: ${i % perRow}`}>
           <Frame
@@ -118,6 +120,7 @@ const backInk = inkLeft(BACK, 'caption');
     }
 
     <div class:list={['wayon', `span-${span}`]}>
+      <div class="wayon-box">
       <p class="t-caption ink-top next-label" style={`margin-left: -${inkLeft('Next', 'caption')}px`}>
         Next
       </p>
@@ -135,8 +138,11 @@ const backInk = inkLeft(BACK, 'caption');
         href="/projects/"
         style={`margin-left: -${backInk}px; --ul-l: ${backInk}px`}>{BACK}</a
       >
+      </div>
     </div>
   </div>
+
+  <Speculate match="/projects/*" />
 </Page>
 
 <style>
@@ -162,19 +168,16 @@ const backInk = inkLeft(BACK, 'caption');
   }
 
   /*
-    The frames sit 75px under the SIDE column, not under the tallest of the
-    three: on D4-Series-Days the statement ends at 308 and the frames start
-    at 352, which is 75 under the attribution at 277. So the statement is
-    taken out of the row's height -- an absolutely positioned grid child is
-    still placed in its grid area, so the column arithmetic is unchanged.
+    The frames clear the TALLEST of the three modules by 75px.
+
+    This supersedes what step 5 did. D4-Series-Days puts the frames 75
+    under the side column and only 44 under the statement, and matching
+    that exactly meant taking the statement out of the row's height --
+    which worked on that board because its statement is short. On six of
+    the eleven series it is not, and the statement ran underneath the
+    photographs. Clearing the tallest column costs 31px against the board
+    on Days at Sea and is correct everywhere.
   */
-  @media (min-width: 1024px) {
-    .statement {
-      position: absolute;
-      top: 0;
-      align-self: start;
-    }
-  }
 
   .statement {
     --ink-cap-int: var(--cap-int-text);
@@ -206,8 +209,27 @@ const backInk = inkLeft(BACK, 'caption');
     margin-top: 10px;
   }
 
+  /* The way on is a cell like any other: it keeps a frame's proportions
+     so that "Back to Projects" sits on the bottom edge of the row. Where
+     the frames fill their rows exactly it would otherwise be only as tall
+     as its own three lines, and the link landed on the years above it and
+     the footer below. */
   .wayon {
+    container-type: inline-size;
+  }
+
+  /* The box is as tall as a frame of this series in this module: the
+     photograph's proportion snapped DOWN to a whole pixel, the same
+     derivation Frame makes, so the row and the link on its bottom edge
+     stay on integer pixels. (An aspect-ratio on the cell leaves both on
+     a fraction; a container query unit cannot resolve against the
+     element that declares the container, hence the inner box.) */
+  .wayon-box {
     position: relative;
+    /* flow-root, so the first line's negative ink offset does not
+       collapse through and carry the box 4px up the row. */
+    display: flow-root;
+    height: round(down, calc(100cqw / var(--series-ratio)), 1px);
   }
 
   /* on the cell's bottom edge */
@@ -215,6 +237,15 @@ const backInk = inkLeft(BACK, 'caption');
     position: absolute;
     bottom: -5px;
     left: 0;
+  }
+
+  /* The link hangs 5px below the grid, so the grid's own box ends above
+     its last line. Without this the line lands on the footer. 28 is the
+     body rhythm: 11 of it is the overhang, 17 the gap to the footer. */
+  @media (min-width: 1024px) {
+    .frames {
+      padding-bottom: var(--rhythm);
+    }
   }
 
   /* Phone: one column. The epigraph and its attribution come before the
@@ -261,6 +292,12 @@ const backInk = inkLeft(BACK, 'caption');
     .wayon {
       grid-column: 1 / -1;
       margin-top: 64px;
+    }
+
+    /* On one column the way on is three lines and a link, not a cell in
+       a row of frames: it takes its own height. */
+    .wayon-box {
+      height: auto;
     }
 
     .back {

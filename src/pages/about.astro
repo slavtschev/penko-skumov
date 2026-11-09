@@ -15,7 +15,6 @@ const homeEntry = await getEntry('home', 'home');
 const quotation = homeEntry!.data.quotation;
 
 const TITLE = 'About';
-const PORTRAIT_CAPTION = 'Penko Skumov';
 
 const exhibitionsLabel = 'Exhibitions and awards, 2000–2025';
 const publicationsLabel = 'Publications, 2005–2024';
@@ -43,10 +42,6 @@ const publications = rowsOf(about.publications);
           />
         )
       }
-      <p class="t-caption portrait-caption" style={`margin-left: -${inkLeft(PORTRAIT_CAPTION, 'caption')}px`}>
-        {PORTRAIT_CAPTION}
-      </p>
-
       <dl class="pairs affiliations">
         {
           about.affiliations.map((a) => (
@@ -103,10 +98,6 @@ const publications = rowsOf(about.publications);
     align-items: start;
   }
 
-  .portrait-caption {
-    margin-top: var(--caption-gap);
-  }
-
   /* year in column 1 of the module, entry from column 2 on */
   .pairs {
     display: grid;
@@ -154,7 +145,9 @@ const publications = rowsOf(about.publications);
 
   .affiliations {
     grid-column: 1 / -1;
-    margin-top: 38px;
+    /* the caption that used to sit here is gone, so the affiliations take
+       its place under the portrait */
+    margin-top: calc(var(--caption-gap) + var(--caption-line) + 38px);
   }
 
   .bio {
@@ -162,9 +155,10 @@ const publications = rowsOf(about.publications);
     text-wrap: pretty;
   }
 
+  /* the quotation starts on the bio's line, not on the title's */
   .quotation {
     margin: 0;
-    margin-top: calc(-1 * var(--cap-int-text));
+    margin-top: calc(var(--title-line) + 22px - var(--cap-int-title));
     color: var(--grey);
     text-wrap: pretty;
   }

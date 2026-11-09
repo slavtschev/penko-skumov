@@ -18,8 +18,12 @@
   /* --- motion: "cut and dissolve". Linear only, opacity only. --- */
   --cut: 0ms;
   --dissolve-out: 300ms;
-  --dissolve: 600ms;
-  --dissolve-load: 1000ms;
+  /* Halved against the handoff's 600/1000 after seeing it run: the
+     dissolves read as sluggish, above all on the slideshow and when one
+     photograph replaces another. Still inside the design's set of
+     durations -- 0, 300, 600, 1000. */
+  --dissolve: 300ms;
+  --dissolve-load: 600ms;
   --timing: linear;
 
   /* --- type --- */

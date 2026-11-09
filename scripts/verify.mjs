@@ -13,36 +13,12 @@
  *   CHROMIUM=/path/to/chrome npm run verify
  */
 import { chromium } from 'playwright';
-import { createServer } from 'node:http';
-import { readFile } from 'node:fs/promises';
 import { mkdir } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { join } from 'node:path';
+import { launchOptions, serveDist } from './serve-dist.mjs';
 
-const DIST = new URL('../dist/', import.meta.url).pathname;
 const SHOTS = new URL('../shots/', import.meta.url).pathname;
 const PORT = 4399;
-
-const TYPES = {
-  '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript',
-  '.woff2': 'font/woff2', '.svg': 'image/svg+xml', '.png': 'image/png',
-  '.jpg': 'image/jpeg', '.avif': 'image/avif', '.webp': 'image/webp',
-};
-
-const serve = () =>
-  new Promise((resolve) => {
-    const server = createServer(async (req, res) => {
-      let p = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
-      if (p.endsWith('/')) p += 'index.html';
-      try {
-        const body = await readFile(join(DIST, p));
-        res.writeHead(200, { 'content-type': TYPES[extname(p)] ?? 'application/octet-stream' });
-        res.end(body);
-      } catch {
-        res.writeHead(404).end('not found');
-      }
-    });
-    server.listen(PORT, () => resolve(server));
-  });
 
 /** Board positions. [what, selector, what to read, expected] */
 const CHECKS = [
@@ -77,13 +53,15 @@ const CHECKS = [
 
   /* step 4 -- D4-About. Everything below the portrait sits 2px above the
      board, which is the portrait's own derived box: 562 where the board
-     draws 564. */
+     draws 564. The portrait caption is gone (Dimitar, 09.11) and the
+     quotation now starts on the bio's first line at 112, not the board's
+     56: with no name under the photograph there is nothing to align the
+     top of the right column to. */
   ['1440 portrait', 'about', 1440, '.portrait .box', (b) => [b.x, b.y, b.w, b.h], [40, 64, 440, 562]],
-  ['1440 portrait caption', 'about', 1440, '.portrait-caption', (b) => [b.x, b.y], [39, 634]],
   ['1440 affiliations', 'about', 1440, '.affiliations', (b) => [b.x, b.y], [40, 688]],
   ['1440 About h1', 'about', 1440, 'h1', (b) => [b.x, b.y], [500, 58]],
   ['1440 bio', 'about', 1440, '.bio', (b) => [b.x, b.y, b.w], [500, 112, 440]],
-  ['1440 quotation', 'about', 1440, '.quotation', (b) => [b.x, b.y, b.w], [960, 56, 440]],
+  ['1440 quotation', 'about', 1440, '.quotation', (b) => [b.x, b.y, b.w], [960, 112, 440]],
   ['1440 exhibitions label', 'about', 1440, '.label', (b) => [b.x, b.y], [39, 890]],
   ['1440 exhibitions list', 'about', 1440, '.list', (b) => [b.x, b.y, b.w], [40, 925, 900]],
 
@@ -98,15 +76,20 @@ const CHECKS = [
   /* step 5 -- D4-Series-Days and D4-Series-Vertical. Every text position
      is the board's. The frame boxes are derived rather than drawn (293
      where the board has 292, 487 where it has 488), so the way on, which
-     sits in the last row, carries that difference times the row count. */
+     sits in the last row, carries that difference times the row count.
+     The frames start 75px under the TALLEST of the three head modules,
+     not the side column as the board implies: on Days at Sea the
+     statement runs 3px lower than the attribution, hence 355 for the
+     board's 352. Anything else overlaps the frames on the long
+     statements (Six Days on an Island, Sense of Freedom). */
   ['1440 series h1', 'days-at-sea', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
   ['1440 series years', 'days-at-sea', 1440, '.years', (b) => [b.x, b.y], [40, 93]],
   ['1440 epigraph', 'days-at-sea', 1440, '.epigraph', (b) => [b.x, b.y], [40, 224]],
   ['1440 epigraph source', 'days-at-sea', 1440, '.attribution', (b) => [b.x, b.y], [40, 261]],
   ['1440 statement col 1', 'days-at-sea', 1440, '.statement', (b) => [b.x, b.y, b.w], [500, 56, 440]],
   ['1440 statement col 2', 'days-at-sea', 1440, '.statement + .statement', (b) => [b.x, b.y, b.w], [960, 56, 440]],
-  ['1440 first frame', 'days-at-sea', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 352, 440, 293]],
-  ['1440 third frame in row', 'days-at-sea', 1440, '.cell:nth-child(3) .box', (b) => [b.x, b.y], [960, 352]],
+  ['1440 first frame', 'days-at-sea', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 355, 440, 293]],
+  ['1440 third frame in row', 'days-at-sea', 1440, '.cell:nth-child(3) .box', (b) => [b.x, b.y], [960, 355]],
   ['1440 portrait frame', 'vertical-summer', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 184, 325, 487]],
   ['1440 fourth portrait frame', 'vertical-summer', 1440, '.cell:nth-child(4) .box', (b) => [b.x, b.y], [1075, 184]],
   ['1440 way on label', 'vertical-summer', 1440, '.next-label', (b) => [b.x, b.y], [1074, 1194]],
@@ -171,11 +154,9 @@ const box = (page, selector, read) =>
     [selector, read.toString()],
   );
 
-const server = await serve();
+const server = await serveDist(PORT);
 await mkdir(SHOTS, { recursive: true });
-const browser = await chromium.launch(
-  process.env.CHROMIUM ? { executablePath: process.env.CHROMIUM, args: ['--no-sandbox'] } : {},
-);
+const browser = await chromium.launch(launchOptions());
 let failed = 0;
 
 /* Pages are measured in a window tall enough that none of them scroll,

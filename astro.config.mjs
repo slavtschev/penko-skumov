@@ -14,6 +14,10 @@ export default defineConfig({
   trailingSlash: 'always',
   build: { format: 'directory' },
   devToolbar: { enabled: false },
+  /* The viewer is a page per frame, so opening one is a navigation and
+     felt slow. Hovering a frame fetches it, so the click lands on a
+     document already in cache. */
+  prefetch: { prefetchAll: false, defaultStrategy: 'hover' },
   // Astro emits each photograph's original alongside the variants it makes
   // from it; nothing links to them. See scripts/prune-assets.mjs.
   integrations: [prune(), redirects(), siteFiles()],

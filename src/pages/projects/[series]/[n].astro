@@ -3,6 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import Frame from '../../../components/Frame.astro';
 import Page from '../../../layouts/Page.astro';
+import Speculate from '../../../components/Speculate.astro';
 import { baseline, inkLeft, inkRight } from '../../../lib/ink';
 
 /* D4-Viewer-1 and -2, D4-Phone-Viewer-1. One photograph on white, at its
@@ -84,7 +85,7 @@ const ink = {
     <div class="stage" style={`--plate-ratio: ${+(frame.width / frame.height).toFixed(6)}`}>
       {
         next ? (
-          <a class="plate" href={href(next.order)} aria-label="Next photograph">
+          <a class="plate" href={href(next.order)} data-astro-prefetch aria-label="Next photograph">
             <Frame
               file={frame.file}
               width={frame.width}
@@ -127,8 +128,8 @@ const ink = {
         class="controls t-ui span-4 start-9"
         aria-label="Photograph"
         style={`margin-right: -${ink.next}px`}>
-        {previous ? <a class="u" href={href(previous.order)} rel="prev">Previous</a> : <span class="off">Previous</span>}
-        {next ? <a class="u" href={href(next.order)} rel="next">Next</a> : <span class="off">Next</span>}
+        {previous ? <a class="u" href={href(previous.order)} rel="prev" data-astro-prefetch>Previous</a> : <span class="off">Previous</span>}
+        {next ? <a class="u" href={href(next.order)} rel="next" data-astro-prefetch>Next</a> : <span class="off">Next</span>}
       </nav>
     </div>
   </div>
@@ -136,6 +137,8 @@ const ink = {
   {/* the neighbours, so moving along is instant */}
   {previous && <link rel="prefetch" href={href(previous.order)} />}
   {next && <link rel="prefetch" href={href(next.order)} />}
+
+  <Speculate match="/projects/*" />
 </Page>
 
 <style>
@@ -183,6 +186,9 @@ const ink = {
      pixels, and an odd remainder would otherwise leave it on a half. */
   .plate {
     --plate-w: round(down, min(100%, calc((100svh - 144px) * var(--plate-ratio))), 1px);
+    /* The viewer is a step the reader took, not a page settling: the
+       photograph comes up over 300ms, not the 600 of a page load. */
+    --dissolve-load: var(--dissolve-out);
     display: block;
     width: var(--plate-w);
     margin-left: round(down, calc((100% - var(--plate-w)) / 2), 1px);
