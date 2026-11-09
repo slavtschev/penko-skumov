@@ -1,0 +1,16 @@
+# Netlify build.
+#
+# `source:images` fetches the 157 photographs, which are not in git: 128MB
+# of JPEGs do not belong in the history. See the note in README.md.
+#
+# This is a stopgap. It pulls them from penkoskumov.com -- the OLD site --
+# so the build depends on the site this one replaces still being online.
+# Before launch the photographs must move to storage we control and
+# ORIGIN in scripts/fetch-source.mjs must point there instead.
+[build]
+  command = "npm run source:images && npm run build"
+  publish = "dist"
+
+[build.environment]
+  # Astro 7 and sharp
+  NODE_VERSION = "22"
