@@ -50,7 +50,7 @@ const titleInk = inkLeft(contact.title, 'title');
 const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
 ---
 
-<Page title={contact.title} current="contact">
+<Page title={contact.title} current="contact" description={contact.sentence ?? undefined}>
   <div class="grid">
     <section class="wallside span-8 start-1" aria-label="Fine art prints">
       <div class="wall">

@@ -5,6 +5,7 @@ import Header from '../components/Header.astro';
 import { gridTokens } from '../lib/grid';
 import { inkTokens } from '../lib/ink';
 import type { NavKey } from '../lib/nav';
+import { SITE_NAME, absolute, indexable } from '../lib/site';
 
 interface Props {
   /** The <title>; "Penko Skumov" is appended on every page but the Home. */
@@ -14,10 +15,19 @@ interface Props {
   footer?: boolean;
   /** The viewer carries no header: its counter and Close are the top row. */
   header?: boolean;
+  /**
+   * One sentence for search results and link previews. Taken from the
+   * content wherever the content has one -- a series' statement, the
+   * bio, the contact line -- never invented.
+   */
+  description?: string;
 }
 
-const { title, current, footer = true, header = true } = Astro.props;
-const documentTitle = footer ? `${title} — Penko Skumov` : title;
+const { title, current, footer = true, header = true, description } = Astro.props;
+const documentTitle = footer ? `${title} \u2014 Penko Skumov` : title;
+
+const canonical = absolute(Astro.url.pathname);
+const share = absolute('/og.jpg');
 ---
 
 <!doctype html>
@@ -26,6 +36,25 @@ const documentTitle = footer ? `${title} — Penko Skumov` : title;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{documentTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="canonical" href={canonical} />
+
+    {/* Indexing is opt-in: a test deploy must not compete with the real
+        site. INDEXABLE=true is the switch, thrown with the real domain. */}
+    {!indexable && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={documentTitle} />
+    {description && <meta property="og:description" content={description} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={share} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
     <link rel="preload" href="/fonts/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/Satoshi-Medium.woff2" as="font" type="font/woff2" crossorigin />
     {/* Generated at build: the grid tiers, and the vertical ink offsets

@@ -40,9 +40,12 @@ const previewSpan = (cover?: { width: number; height: number }) =>
   cover && cover.width < cover.height ? 2 : 4;
 
 const previewable = withCover.filter((s) => s.cover);
+
+const description =
+  `${projects.length} projects and ${archive.length} from the archive, photographed by Penko Skumov.`;
 ---
 
-<Page title="Projects" current="projects">
+<Page title="Projects" current="projects" description={description}>
   <h1 class="visually-hidden">Projects</h1>
 
   <div class="index grid">

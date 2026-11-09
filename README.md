@@ -58,6 +58,9 @@ swipe, prefetched neighbours, no wrap.
 **Step 7** -- the Home slideshow and the Contact wall, on one engine
 (`src/lib/slideshow.ts`).
 
+**Step 10, in part** -- redirects from every old address, the sitemap,
+robots.txt, canonical and Open Graph, the favicon.
+
 ```
 public/fonts/        Satoshi 400 and 500, woff2, self-hosted
 scripts/             font-metrics.py, fetch-source.mjs, import-webflow.mjs
@@ -203,3 +206,46 @@ it, and nothing links to them: 123MB of the first 133MB build. The `prune`
 integration in `astro.config.mjs` deletes any asset whose name appears
 nowhere in the built HTML, CSS or JS, which brought that build to 10MB. It
 reports what it removed on every build.
+
+## Deploying
+
+Where the build thinks it lives, and whether it may be indexed, are
+environment variables rather than constants -- the site goes to a test
+URL before the real domain.
+
+| | |
+|---|---|
+| `SITE_URL` | the origin for canonical, Open Graph and the sitemap. Falls back to Netlify's own `URL`, then to localhost. |
+| `INDEXABLE` | `true` lets robots.txt allow crawling and drops the `noindex` meta. **Anything else keeps the whole site out of the index.** |
+
+Indexing is opt-in on purpose: a test deploy that gets crawled competes
+with the real site for the same words. Setting `INDEXABLE=true` is the
+switch to throw when the real domain is connected, and not before.
+
+`dist/_redirects` is generated from the content at build (see
+`scripts/write-redirects.mjs`), so the list of series redirects cannot
+drift from the real one. It covers every address the Webflow site
+answered on, including `lith-prints.html.html`.
+
+### The photographs are not in the repo
+
+`npm run source:images` fetches them, and `netlify.toml` runs it before
+the build. **That script currently pulls from penkoskumov.com -- the
+site this one replaces -- so the build depends on the old site being
+online.** Before the domain moves, the photographs have to live in
+storage we control and `ORIGIN` in `scripts/fetch-source.mjs` must point
+there.
+
+### Descriptions and the mark
+
+Every page's meta description is taken from its own content: a series'
+statement, the bio, the contact line. Nothing is invented, which also
+means none of it is written *as* a description -- About's reads "I was
+born on October 19, 1978 in Burgas, Bulgaria." They are worth a human
+pass before launch.
+
+`public/favicon.svg` is the one piece of design not taken from a board,
+because no board draws a mark: "PS" in Satoshi Medium, as outlines, set
+solid rather than at the wordmark's +0.16em, which at 16px reads as two
+separate marks. `scripts/make-favicon.py` regenerates it. Replace it as
+soon as there is a real mark.

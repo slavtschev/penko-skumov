@@ -65,7 +65,12 @@ const ink = {
 };
 ---
 
-<Page title={`${series.title} ${counter}`} header={false} footer={false}>
+<Page
+  title={`${series.title} ${counter}`}
+  header={false}
+  footer={false}
+  description={`${caption}. Photograph ${index + 1} of ${count} from ${series.title}.`}
+>
   <div class="viewer" data-previous={previous ? href(previous.order) : undefined} data-next={next ? href(next.order) : undefined} data-close={seriesHref}>
     <p class="t-caption counter" style={`top: ${counterTop}px; left: calc(var(--margin) - ${ink.counter}px)`}>
       {counter}

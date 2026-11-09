@@ -4,6 +4,7 @@ import { getCollection } from 'astro:content';
 import Frame from '../../components/Frame.astro';
 import Page from '../../layouts/Page.astro';
 import { inkLeft, inkRight } from '../../lib/ink';
+import { firstSentence } from '../../lib/site';
 
 /* D4-Series-Days and D4-Series-Vertical. Title, years, epigraph and
    statement across three modules, then bare frames -- no numbers, no
@@ -50,11 +51,16 @@ const epigraphInk = series.epigraph && !opensWithQuote ? inkLeft(series.epigraph
 
 const titleInk = inkLeft(series.title, 'title');
 const nextInk = { l: inkLeft(next.title, 'title'), r: inkRight(next.title, 'title') };
+/* the opening of the statement, or the plain facts where there is none */
+const description =
+  firstSentence(series.statement) ??
+  `${series.title}, ${series.years}. Photographs by Penko Skumov.`;
+
 const BACK = 'Back to Projects';
 const backInk = inkLeft(BACK, 'caption');
 ---
 
-<Page title={series.title} current="projects">
+<Page title={series.title} current="projects" description={description}>
   <div class="grid head">
     <div class="side span-4 start-1">
       <h1 class="t-title ink-top" style={`margin-left: -${titleInk}px`}>{series.title}</h1>

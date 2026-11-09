@@ -3,6 +3,7 @@ import { getEntry } from 'astro:content';
 import Frame from '../components/Frame.astro';
 import Page from '../layouts/Page.astro';
 import { inkLeft } from '../lib/ink';
+import { firstSentence } from '../lib/site';
 
 /* D4-About: the portrait, its caption and the affiliations in columns 1-4;
    the title and bio in 5-8; the quotation in 9-12. Then Exhibitions and
@@ -27,7 +28,7 @@ const exhibitions = rowsOf(about.exhibitions);
 const publications = rowsOf(about.publications);
 ---
 
-<Page title={TITLE} current="about">
+<Page title={TITLE} current="about" description={firstSentence(about.bio[0] ?? null)}>
   <div class="grid about">
     <div class="portrait span-4 start-1">
       {
