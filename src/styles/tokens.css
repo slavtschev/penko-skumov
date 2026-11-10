@@ -29,6 +29,11 @@
   /* --- type --- */
   --family: 'Satoshi', 'Helvetica Neue', Arial, sans-serif;
 
+  /* Designs 5: the page title, the one h1. 36/40 on the phone, below. */
+  --display-size: 56px;
+  --display-line: 56px;
+  --display-tracking: -0.03em;
+
   --name-size: 14px;
   --name-line: 20px;
   --name-tracking: 0.16em;
@@ -59,6 +64,10 @@
   --caption-gap: 8px;
   --row-gap: 24px;
 
+  /* Designs 5: content starts on column 5; the left margin carries only
+     what names it -- a page title, a section label, a portrait. */
+  --axis: 5;
+
   /* --- grid ---------------------------------------------------------
      The tier values are NOT here: --cols, --margin and --gutter are
      emitted from src/lib/grid.ts, which is also where every photograph's
@@ -70,4 +79,14 @@
        S   768-1023    8 col  margin 28  gutter 16
        XS  <768        4 col  margin 20  gutter 12
   */
+}
+
+/* The Display style is the one that changes size with the tier; its ink
+   offsets follow it, emitted by src/lib/ink.ts. */
+@media (max-width: 767px) {
+  :root {
+    --display-size: 36px;
+    --display-line: 40px;
+    --display-tracking: -0.02em;
+  }
 }

@@ -46,7 +46,8 @@ const rows = [
   },
 ].filter((r) => r.value && r.href);
 
-const titleInk = inkLeft(contact.title, 'title');
+const titleInk = inkLeft(contact.title, 'display');
+const titleInkXs = inkLeft(contact.title, 'displayXs');
 const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
 ---
 
@@ -77,7 +78,7 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
                   </span>
                 </a>
                 <figcaption class="plaque t-caption">
-                  <span class="size">Fine art print, {print.size}</span>
+                  <span class="size"><span class="made">Fine art print, </span>{print.size}</span>
                   <span class="count">
                     {`${String(print.n).padStart(2, '0')} / ${String(prints.length).padStart(2, '0')}`}
                   </span>
@@ -108,7 +109,11 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
     </section>
 
     <section class="details subgrid span-4 start-9">
-      <h1 class="t-title ink-top" style={`margin-left: -${titleInk}px`}>{contact.title}</h1>
+      <h1
+        class="t-display ink-top"
+        style={`--ink-l: ${titleInk}px; --ink-l-xs: ${titleInkXs}px`}>
+        {contact.title}
+      </h1>
       {
         contact.sentence && (
           <p class="t-text sentence" style={`margin-left: -${sentenceInk}px`}>{contact.sentence}</p>
@@ -275,8 +280,14 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
   }
 
   /* --- the details ----------------------------------------------------- */
+  h1 {
+    white-space: nowrap;
+    margin-left: calc(-1 * var(--ink-l));
+  }
+
+  /* the sentence's cap-top on 160, as D5-Contact draws it */
   .sentence {
-    margin-top: 22px;
+    margin-top: 41px;
   }
 
   /* The rows sit at the foot of the column, a gutter clear of where the
@@ -337,6 +348,45 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
       margin-top: 44px;
     }
 
+    /* D5-Phone-Contact sets the sentence 24 under the title's line box */
+    .sentence {
+      margin-top: 24px;
+    }
+
+    /* The phone wall is square and the print hangs larger in it: 76% of
+       the wall against the page's 65, with the moulding and mat at the
+       handoff's own 8 and 20. All four are D5-Phone-Contact's. */
+    .wall {
+      aspect-ratio: 1;
+    }
+
+    .fr {
+      width: 76cqw;
+      padding: 2.286cqw;
+    }
+
+    .print[data-portrait] .fr {
+      width: 56cqw;
+    }
+
+    .mat {
+      padding: 5.714cqw;
+    }
+
+    /* the plaque carries the size alone there, and sits lower on the
+       wall: D5-Phone-Contact puts its line box 7 off the foot */
+    .made {
+      display: none;
+    }
+
+    .plaque {
+      bottom: 7px;
+    }
+
+    .details {
+      margin-top: 77px;
+    }
+
     .row {
       display: block;
       padding-bottom: 20px;
@@ -344,6 +394,12 @@ const sentenceInk = contact.sentence ? inkLeft(contact.sentence, 'text') : 0;
 
     .label {
       margin-left: -1px;
+    }
+  }
+
+  @media (max-width: 767px) {
+    h1 {
+      margin-left: calc(-1 * var(--ink-l-xs));
     }
   }
 </style>

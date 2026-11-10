@@ -19,11 +19,6 @@ export function initHome() {
     for (const el of document.querySelectorAll<HTMLElement>('[data-link]')) {
       links.set(Number(el.dataset.link), el);
     }
-    const counter = document.querySelector<HTMLElement>('#counter');
-    const pause = document.querySelector<HTMLButtonElement>('[data-control="pause"]');
-    const total = slideEls.length;
-    const pad = (n: number) => String(n).padStart(2, '0');
-
     /* 6s a slide: 600 in, 4.8s on, 600 out. The quotation is held 36s --
        133 words need about that long to read. */
     const holds = slideEls.map((el) => (el.classList.contains('quote') ? 34800 : 4800));
@@ -33,7 +28,6 @@ export function initHome() {
       onChange(index) {
         for (const [i, el] of captions) el.hidden = i !== index;
         for (const [i, el] of links) el.hidden = i !== index;
-        if (counter) counter.textContent = `${pad(index + 1)} / ${pad(total)}`;
       },
       preload(index) {
         const img = slideEls[index]?.querySelector('img');
@@ -54,11 +48,6 @@ export function initHome() {
 
     document.querySelector('[data-control="previous"]')?.addEventListener('click', () => player.previous());
     document.querySelector('[data-control="next"]')?.addEventListener('click', () => player.next());
-    pause?.addEventListener('click', () => {
-      const stopped = player.toggle();
-      pause.textContent = stopped ? 'Play' : 'Pause';
-      pause.setAttribute('aria-pressed', String(stopped));
-    });
 
     /* click the photograph, or the arrow keys, or swipe */
     document.querySelector('.stage')?.addEventListener('click', () => player.next());

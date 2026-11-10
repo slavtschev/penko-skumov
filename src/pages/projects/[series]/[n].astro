@@ -73,6 +73,8 @@ const ink = {
   description={`${caption}. Photograph ${index + 1} of ${count} from ${series.title}.`}
 >
   <div class="viewer" data-previous={previous ? href(previous.order) : undefined} data-next={next ? href(next.order) : undefined} data-close={seriesHref}>
+    <h1 class="visually-hidden">{series.title}, photograph {index + 1} of {count}</h1>
+
     <p class="t-caption counter" style={`top: ${counterTop}px; left: calc(var(--margin) - ${ink.counter}px)`}>
       {counter}
     </p>
@@ -141,117 +143,6 @@ const ink = {
   <Speculate match="/projects/*" />
 </Page>
 
-<style>
-  /* The viewer is the window: it breaks out of the page's margins so the
-     photograph can go full bleed on the phone, and nothing scrolls. */
-  .viewer {
-    position: relative;
-    height: 100svh;
-    margin-inline: calc(-1 * var(--margin));
-  }
-
-  .counter,
-  .viewer-close,
-  .bottom {
-    position: absolute;
-    white-space: nowrap;
-  }
-
-  .counter {
-    left: var(--margin);
-  }
-
-  .viewer-close {
-    top: 22px;
-    right: var(--margin);
-  }
-
-  /* 100vw less the margins by 100svh less 144, hung from the header line
-     and centred across. On the phone it goes full bleed, as the board
-     draws it -- a margin there would cost a third of the picture. */
-  .stage {
-    position: absolute;
-    top: var(--header);
-    left: var(--margin);
-    right: var(--margin);
-    height: calc(100svh - 144px);
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-
-  /* The widest the photograph can be and still fit the stage's height;
-     Frame derives its own height from that width. Both the width and the
-     centring are snapped down to whole pixels -- frames sit on integer
-     pixels, and an odd remainder would otherwise leave it on a half. */
-  .plate {
-    --plate-w: round(down, min(100%, calc((100svh - 144px) * var(--plate-ratio))), 1px);
-    /* The viewer is a step the reader took, not a page settling: the
-       photograph comes up over 300ms, not the 600 of a page load. */
-    --dissolve-load: var(--dissolve-out);
-    display: block;
-    width: var(--plate-w);
-    margin-left: round(down, calc((100% - var(--plate-w)) / 2), 1px);
-  }
-
-  .bottom {
-    left: var(--margin);
-    right: var(--margin);
-    /* the controls' line sits 34px off the foot of the window */
-    bottom: 34px;
-    align-items: baseline;
-    row-gap: 0;
-  }
-
-  .caption,
-  .series-link {
-    /* share the controls' baseline; the two styles differ in box height */
-    margin-bottom: 0;
-  }
-
-  .controls {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--nav-gap);
-  }
-
-  .off {
-    color: var(--grey);
-  }
-
-  @media (max-width: 767px) {
-    .stage {
-      left: 0;
-      right: 0;
-    }
-
-    /* With a series link the phone stacks: the caption on its own line,
-       the link and the controls sharing the one below. Without a link the
-       caption takes the controls' line, as it does on the desktop. */
-    .has-link .caption,
-    .has-link .series-link {
-      grid-column: 1 / -1;
-    }
-
-    .has-link .caption {
-      order: 1;
-    }
-
-    .has-link .series-link {
-      order: 2;
-      grid-column: 1 / 3;
-    }
-
-    .caption {
-      grid-column: 1 / 3;
-    }
-
-    .controls {
-      grid-column: 3 / -1;
-      order: 3;
-    }
-  }
-</style>
 
 <script>
   const viewer = document.querySelector<HTMLElement>('.viewer');

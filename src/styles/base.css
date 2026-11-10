@@ -1,4 +1,5 @@
 @import './tokens.css';
+@import './viewer.css';
 
 /* --- Satoshi, self-hosted, the two weights the design uses ---------------
  * font-display: block, not swap. Every ink offset in this design is measured
@@ -112,6 +113,33 @@ a {
  * Each one carries the ink offsets for its own size, so .ink-top can pull a
  * line up onto a cap-top and .u can place its rule.
  */
+.t-display {
+  font: 400 var(--display-size) / var(--display-line) var(--family);
+  letter-spacing: var(--display-tracking);
+  --ink-cap: var(--cap-display);
+  --ink-cap-int: var(--cap-int-display);
+  --ul-b: 1px;
+}
+
+/* Section headings (h2). The same style as the site name. */
+.t-label {
+  font: 500 var(--name-size) / var(--name-line) var(--family);
+  letter-spacing: var(--name-tracking);
+  text-transform: uppercase;
+  --ink-cap: var(--cap-label);
+  --ink-cap-int: var(--cap-int-label);
+  --ul-b: 1px;
+}
+
+/* The About quotation: the title's size and line at weight 400. */
+.t-quote {
+  font: 400 var(--title-size) / var(--title-line) var(--family);
+  letter-spacing: var(--title-tracking);
+  --ink-cap: var(--cap-quote);
+  --ink-cap-int: var(--cap-int-quote);
+  --ul-b: 2px;
+}
+
 .t-name {
   font: 500 var(--name-size) / var(--name-line) var(--family);
   letter-spacing: var(--name-tracking);

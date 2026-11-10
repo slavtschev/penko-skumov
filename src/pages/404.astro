@@ -2,7 +2,8 @@
 import Page from '../layouts/Page.astro';
 import { inkLeft } from '../lib/ink';
 
-/* D4-404 / D4-Phone-404: a title, one sentence, two links. */
+/* D5-404 / D5-Phone-404: the title in the margin, the sentence and
+   the two links on the axis. */
 
 const TITLE = 'Page not found';
 const SENTENCE = 'The page you are looking for doesn’t exist or has been moved';
@@ -12,14 +13,17 @@ const links = [
   { label: 'Projects', href: '/projects/' },
 ].map((l) => ({ ...l, ink: inkLeft(l.label, 'ui') }));
 
-const titleInk = inkLeft(TITLE, 'title');
+const titleInk = inkLeft(TITLE, 'display');
+const titleInkXs = inkLeft(TITLE, 'displayXs');
 const sentenceInk = inkLeft(SENTENCE, 'text');
 
 ---
 
 <Page title={TITLE} footer={true} description={SENTENCE}>
   <div class="grid">
-    <h1 class="t-title ink-top span-4 start-1" style={`margin-left: -${titleInk}px`}>
+    <h1
+      class="t-display ink-top span-4 start-1"
+      style={`--ink-l: ${titleInk}px; --ink-l-xs: ${titleInkXs}px`}>
       {TITLE}
     </h1>
 
@@ -46,6 +50,13 @@ const sentenceInk = inkLeft(SENTENCE, 'text');
 <style>
   h1 {
     white-space: nowrap;
+    margin-left: calc(-1 * var(--ink-l));
+  }
+
+  @media (max-width: 767px) {
+    h1 {
+      margin-left: calc(-1 * var(--ink-l-xs));
+    }
   }
 
   .aside {
@@ -73,8 +84,9 @@ const sentenceInk = inkLeft(SENTENCE, 'text');
     }
 
     .aside {
-      /* title box 58..90; the sentence's box starts at 112 */
-      margin-top: 22px;
+      /* D5-Phone-404: the title's box ends at 96, the sentence's starts
+         at 121 */
+      margin-top: 25px;
     }
 
     .links {

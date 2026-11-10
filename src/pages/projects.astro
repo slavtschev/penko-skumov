@@ -1,12 +1,15 @@
 ---
-import { getCollection, getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import Frame from '../components/Frame.astro';
 import Page from '../layouts/Page.astro';
-import { boxTopForCap, inkLeft, inkRight } from '../lib/ink';
+import { capGapAfterBaseline, capOffset, inkLeft, inkRight } from '../lib/ink';
 
-/* D4-Projects: Projects in columns 1-4, Archive in 5-8, and a slot in
-   9-12 showing the opening frame of the series under the pointer, the
-   first row by default. D4-Phone-Projects: the two lists in one column. */
+/* D5-Projects. The Designs 5 axis: the page title alone on the left
+   margin, one list on column 5 with the years in their own 115px column,
+   and the preview of the series under the pointer in columns 9-12.
+   Archive is a label on the margin with its list on the same axis.
+   D5-Phone-Projects: one column, title over year, the label above its
+   list. */
 
 const series = (await getCollection('series')).sort((a, b) => a.data.order - b.data.order);
 const frames = await getCollection('frames');
@@ -28,139 +31,180 @@ const withCover = series.map((entry) => {
 const projects = withCover.filter((s) => s.group === 'projects');
 const archive = withCover.filter((s) => s.group === 'archive');
 
-/* Section labels: a 12/16 line whose cap-top sits on 64, as every page's
-   first line does. */
-const labelTop = boxTopForCap('caption', 64);
-const labelInk = (text: string) => inkLeft(text, 'caption');
+const TITLE = 'Projects';
+const ARCHIVE = 'Archive';
 
-/* The preview slot: 4 columns for a landscape frame, 2 for a portrait one
-   (210px at the L tier), hung from column 9 at the same 64 the lists start
-   from. */
-const previewSpan = (cover?: { width: number; height: number }) =>
-  cover && cover.width < cover.height ? 2 : 4;
+/* The Archive list begins 96 under the last project's baseline: the
+   board's number (last row baseline 420.8, first archive cap-top 516.8),
+   which follows no rule I could derive. */
+const archiveGap = capGapAfterBaseline('title', 'title', 96);
+/* the label's cap-top on the first title's */
+const labelDrop = capOffset('title', 'label');
 
-const previewable = withCover.filter((s) => s.cover);
+/* The phone is drawn, not derived: D5-Phone-Projects sets the first
+   title 38 under the h1's line box, the year 5 under the title's, the
+   rows 60 apart, the Archive label 76 under the last year and its list
+   15 under the label. Taken from the board as they are. */
+const XS = { listTop: 38, yearDrop: 5, pitch: 60, archiveGap: 76, labelToList: 15 };
+const rowGapXs = XS.pitch - 32 - XS.yearDrop - 16;
 
 const description =
   `${projects.length} projects and ${archive.length} from the archive, photographed by Penko Skumov.`;
 ---
 
-<Page title="Projects" current="projects" description={description}>
-  <h1 class="visually-hidden">Projects</h1>
-
+<Page title={TITLE} current="projects" description={description}>
   <div class="index grid">
-    <section class="list subgrid span-4 start-1">
-      <h2 class="t-caption ink-top label" style={`margin-left: -${labelInk('Projects')}px`}>Projects</h2>
-      <ul class="rows">
-        {
-          projects.map((s) => (
-            <li class="row" data-series={s.slug}>
-              <span class="t-caption year" style={`margin-left: -${s.yearInk}px`}>{s.years}</span>
-              {s.cover ? (
-                <a
-                  class="u t-title title"
-                  href={s.href}
-                  style={`margin-left: -${s.titleInk}px; --ul-l: ${s.titleInk}px; --ul-r: ${s.titleInkRight}px`}>
-                  {s.title}
-                </a>
-              ) : (
-                /* Film Archive is on the list but has no page and no frames
-                   on the old site, so there is nothing to link to yet. */
-                <span class="t-title title" style={`margin-left: -${s.titleInk}px`}>{s.title}</span>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    <h1
+      class="t-display ink-top span-4 start-1"
+      style={`--ink-l: ${inkLeft(TITLE, 'display')}px; --ink-l-xs: ${inkLeft(TITLE, 'displayXs')}px`}>
+      {TITLE}
+    </h1>
 
-    <section class="list subgrid span-4 start-5">
-      <h2 class="t-caption ink-top label" style={`margin-left: -${labelInk('Archive')}px`}>Archive</h2>
-      <ul class="rows">
-        {
-          archive.map((s) => (
-            <li class="row" data-series={s.slug}>
-              <span class="t-caption year" style={`margin-left: -${s.yearInk}px`}>{s.years}</span>
-              {s.cover ? (
-                <a
-                  class="u t-title title"
-                  href={s.href}
-                  style={`margin-left: -${s.titleInk}px; --ul-l: ${s.titleInk}px; --ul-r: ${s.titleInkRight}px`}>
-                  {s.title}
-                </a>
-              ) : (
-                /* Film Archive is on the list but has no page and no frames
-                   on the old site, so there is nothing to link to yet. */
-                <span class="t-title title" style={`margin-left: -${s.titleInk}px`}>{s.title}</span>
-              )}
-            </li>
-          ))
-        }
-      </ul>
-    </section>
+    <ul class="rows ink-top subgrid t-title span-4 start-5">
+      {
+        projects.map((s) => (
+          <li class="row" data-series={s.slug}>
+            <span class="t-caption year" style={`margin-left: -${s.yearInk}px`}>
+              {s.years}
+            </span>
+            {s.cover ? (
+              <a
+                class="u t-title title"
+                href={s.href}
+                style={`margin-left: -${s.titleInk}px; --ul-l: ${s.titleInk}px; --ul-r: ${s.titleInkRight}px`}>
+                {s.title}
+              </a>
+            ) : (
+              /* Film Archive is on the list but has no page and no frames
+                 on the old site, so there is nothing to link to yet. */
+              <span class="t-title title" style={`margin-left: -${s.titleInk}px`}>
+                {s.title}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
 
     {/* One preview per series, stacked in the same slot; the pointer picks
         which is shown. They dissolve between each other over 300ms. */}
     <div class="previews span-4 start-9" aria-hidden="true">
       {
-        previewable.map((s, i) => (
-          <figure class="preview" data-preview={s.slug} data-first={i === 0 ? '' : undefined}>
-            <div class={`plate plate-${previewSpan(s.cover)}`}>
-              <Frame
-                file={s.cover!.file}
-                width={s.cover!.width}
-                height={s.cover!.height}
-                alt={null}
-                span={previewSpan(s.cover)}
-                spans={{ S: previewSpan(s.cover) }}
-              />
-            </div>
-            <figcaption class="t-caption caption">
-              <span class="where">{s.captionText}</span>
-              <span class="what">{s.title}</span>
-            </figcaption>
-          </figure>
-        ))
+        withCover
+          .filter((s) => s.cover)
+          .map((s, i) => (
+            <figure class="preview" data-preview={s.slug} data-first={i === 0 ? '' : undefined}>
+              <div class={`plate plate-${s.cover!.width < s.cover!.height ? 2 : 4}`}>
+                <Frame
+                  file={s.cover!.file}
+                  width={s.cover!.width}
+                  height={s.cover!.height}
+                  alt={null}
+                  span={s.cover!.width < s.cover!.height ? 2 : 4}
+                  spans={{ S: s.cover!.width < s.cover!.height ? 2 : 4 }}
+                />
+              </div>
+              <figcaption class="t-caption caption">
+                <span class="where">{s.captionText}</span>
+                <span class="what">{s.title}</span>
+              </figcaption>
+            </figure>
+          ))
       }
     </div>
+
+    <h2
+      class="t-label label span-4 start-1"
+      style={`margin-left: -${inkLeft(ARCHIVE, 'label')}px; --label-drop: ${labelDrop}px`}>
+      {ARCHIVE}
+    </h2>
+
+    <ul class="rows archive subgrid t-title span-4 start-5">
+      {
+        archive.map((s) => (
+          <li class="row" data-series={s.slug}>
+            <span class="t-caption year" style={`margin-left: -${s.yearInk}px`}>
+              {s.years}
+            </span>
+            {s.cover ? (
+              <a
+                class="u t-title title"
+                href={s.href}
+                style={`margin-left: -${s.titleInk}px; --ul-l: ${s.titleInk}px; --ul-r: ${s.titleInkRight}px`}>
+                {s.title}
+              </a>
+            ) : (
+              <span class="t-title title" style={`margin-left: -${s.titleInk}px`}>
+                {s.title}
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ul>
   </div>
 </Page>
 
-<style>
+<style
+  define:vars={{
+    archiveGap: `${archiveGap}px`,
+    listTopXs: `${XS.listTop}px`,
+    yearDropXs: `${XS.yearDrop}px`,
+    rowGapXs: `${rowGapXs}px`,
+    archiveGapXs: `${XS.archiveGap}px`,
+    labelToListXs: `${XS.labelToList}px`,
+  }}>
   .index {
     position: relative;
     row-gap: 0;
+    /* the title, the list and the preview share the first row; the
+       Archive label and its list the second */
+    grid-template-rows: auto auto;
   }
 
-  /* The two lists sit on the page's own columns, so the year lands in
-     column 1 of the module and the title starts in column 2 -- 155px at
-     the L tier, which is the 115px offset the board draws. */
-  .list {
-    align-content: start;
+  /* base.css already clears the heading margins; setting them here would
+     outrank .ink-top, which is what puts the cap-top on 64. */
+  h1 {
+    white-space: nowrap;
+    grid-row: 1;
+    align-self: start;
   }
 
-  .label,
-  .rows {
-    grid-column: 1 / -1;
+  /* the Display style is the one that changes size with the tier, so its
+     side bearing changes with it too */
+  @media (max-width: 767px) {
+    h1 {
+      margin-left: calc(-1 * var(--ink-l-xs));
+    }
   }
 
-  .label {
-    margin-bottom: 0;
+  @media (min-width: 768px) {
+    h1 {
+      margin-left: calc(-1 * var(--ink-l));
+    }
   }
 
+  /* --- the lists ------------------------------------------------------
+     The year sits in its own 115px column (one column and one gutter at
+     the L tier the boards are drawn on) and the title beside it, on the
+     axis. Rows are 48 apart: a 32px line and 16 between. */
+  /* The year sits in column 1 of the module and the title in column 2:
+     115px apart at the L tier the boards are drawn on. A subgrid, so the
+     columns are the page's own and not a share of the module's width. */
   .rows {
     display: grid;
     grid-template-columns: subgrid;
     align-items: baseline;
+    align-content: start;
     row-gap: 16px;
-    /* the label's line box ends at 76; the first title's box starts at 94 */
-    margin-top: 18px;
+    grid-row: 1;
   }
 
-  /* The year comes first in the markup so that auto-placement fills
-     column 1 before the title takes columns 2 to 4; a title placed first
-     would push its own year onto the next row. The phone puts the title
-     back on top with order. */
+  .rows.archive {
+    grid-row: 2;
+    margin-top: var(--archiveGap);
+  }
+
   .row {
     display: contents;
   }
@@ -176,9 +220,17 @@ const description =
     white-space: nowrap;
   }
 
+  /* the label's cap-top on the cap-top of the first title it names */
+  .label {
+    grid-row: 2;
+    align-self: start;
+    margin-top: calc(var(--archiveGap) + var(--label-drop));
+  }
+
   /* --- the preview slot ------------------------------------------------ */
   .previews {
     position: relative;
+    grid-row: 1;
   }
 
   .preview {
@@ -220,7 +272,7 @@ const description =
 
   /* the first row of the Projects list only: it is the one whose preview
      is showing by default */
-  .index:not(:has(.row:hover)) .list:first-of-type .row:first-child .title::after {
+  .index:not(:has(.row:hover)) .rows:not(.archive) .row:first-child .title::after {
     opacity: 1;
   }
 
@@ -231,41 +283,50 @@ const description =
   }
 
   /* The slot needs columns 9 to 12, so it exists only on the twelve-column
-     tiers. Below that the two lists run one under the other, title first
-     and the year under it. */
+     tiers. */
   @media (max-width: 1023px) {
     .previews {
       display: none;
     }
+  }
 
-    .list {
-      grid-column: 1 / -1;
+  /* XS: no room to hang anything in the margin, so the title stands above
+     its list and the rows run title over year, 60 apart. */
+  @media (max-width: 767px) {
+    .index {
       display: block;
-    }
-
-    .list + .list {
-      margin-top: 74px;
     }
 
     .rows {
       display: block;
-      margin-top: 18px;
+      margin-top: var(--listTopXs);
+    }
+
+    .rows.archive {
+      margin-top: 0;
     }
 
     .row {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      padding-bottom: 7px;
     }
 
-    /* title over year, as D4-Phone-Projects draws it */
+    .row + .row {
+      margin-top: var(--rowGapXs);
+    }
+
     .title {
       order: -1;
     }
 
     .year {
-      margin-top: 5px;
+      margin-top: var(--yearDropXs);
+    }
+
+    .label {
+      margin-top: var(--archiveGapXs);
+      margin-bottom: var(--labelToListXs);
     }
   }
 </style>

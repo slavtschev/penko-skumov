@@ -38,69 +38,83 @@ const CHECKS = [
   ['390 menu Contact', 'menu', 390, '.sheet-nav a:nth-child(3)', (b) => [b.x, b.y], [19, 154]],
   ['390 menu Close', 'menu', 390, '.sheet .close span', (b) => [b.right, b.y], [370, 22]],
 
-  /* step 4 -- D4-Projects */
-  ['1440 Projects label', 'projects', 1440, '.label', (b) => [b.x, b.y], [39, 60]],
-  ['1440 Archive label', 'projects', 1440, '.list + .list .label', (b) => [b.x, b.y], [500, 60]],
-  ['1440 first series title', 'projects', 1440, '.title', (b) => [b.x, b.y], [153, 94]],
-  ['1440 first series year', 'projects', 1440, '.year', (b) => [b.x, b.y], [40, 108]],
+  /* Designs 5 -- D5-Projects and D5-Phone-Projects. The h1 sits 1px
+     below and 1px right of the board on every Display line: the board's
+     own cap-top and side bearing for 56/56 are a pixel coarser than the
+     ones derived from the font (CLAUDE.md). Everything else is exact. */
+  ['1440 Projects h1', 'projects', 1440, 'h1', (b) => [b.x, b.y], [36, 55]],
+  ['1440 first series title', 'projects', 1440, '.rows .title', (b) => [b.x, b.y], [613, 58]],
+  ['1440 first series year', 'projects', 1440, '.rows .year', (b) => [b.x, b.y], [500, 72]],
+  ['1440 Archive label', 'projects', 1440, '.label', (b) => [b.x, b.y], [40, 512]],
+  ['1440 first archive title', 'projects', 1440, '.archive .title', (b) => [b.x, b.y], [613, 511]],
   ['1440 preview slot', 'projects', 1440, '.previews', (b) => [b.x, b.w], [960, 440]],
   // the board draws 440x292; the box is derived, so 293 (see CLAUDE.md)
-  ['1440 preview frame', 'projects', 1440, '.preview[data-first] .box', (b) => [b.w, b.h], [440, 293]],
-  ['390 Projects label', 'projects', 390, '.label', (b) => [b.x, b.y], [19, 60]],
-  ['390 first series title', 'projects', 390, '.title', (b) => [b.x, b.y], [18, 94]],
-  ['390 first series year', 'projects', 390, '.year', (b) => [b.x, b.y], [20, 131]],
-  ['390 Archive label', 'projects', 390, '.list + .list .label', (b) => [b.x, b.y], [20, 644]],
+  ['1440 preview frame', 'projects', 1440, '.preview[data-first] .box', (b) => [b.y, b.w, b.h], [64, 440, 293]],
+  ['390 Projects h1', 'projects', 390, 'h1', (b) => [b.x, b.y], [17, 56]],
+  ['390 first series title', 'projects', 390, '.rows .title', (b) => [b.x, b.y], [18, 134]],
+  ['390 first series year', 'projects', 390, '.rows .year', (b) => [b.x, b.y], [20, 171]],
+  ['390 Archive label', 'projects', 390, '.label', (b) => [b.x, b.y], [20, 683]],
+  ['390 first archive title', 'projects', 390, '.archive .title', (b) => [b.x, b.y], [18, 718]],
 
-  /* step 4 -- D4-About. Everything below the portrait sits 2px above the
-     board, which is the portrait's own derived box: 562 where the board
-     draws 564. The portrait caption is gone (Dimitar, 09.11) and the
-     quotation now starts on the bio's first line at 112, not the board's
-     56: with no name under the photograph there is nothing to align the
-     top of the right column to. */
+  /* Designs 5 -- D5-About and D5-Phone-About. Everything below the
+     portrait sits 2px above the board, which is the portrait's own
+     derived box: 562 where the board draws 564. The name under the
+     photograph is gone (Dimitar, 09.11); the space it held is not, so
+     the quotation still starts where the board puts it. */
   ['1440 portrait', 'about', 1440, '.portrait .box', (b) => [b.x, b.y, b.w, b.h], [40, 64, 440, 562]],
-  ['1440 affiliations', 'about', 1440, '.affiliations', (b) => [b.x, b.y], [40, 688]],
-  ['1440 About h1', 'about', 1440, 'h1', (b) => [b.x, b.y], [500, 58]],
-  ['1440 bio', 'about', 1440, '.bio', (b) => [b.x, b.y, b.w], [500, 112, 440]],
-  ['1440 quotation', 'about', 1440, '.quotation', (b) => [b.x, b.y, b.w], [960, 112, 440]],
-  ['1440 exhibitions label', 'about', 1440, '.label', (b) => [b.x, b.y], [39, 890]],
-  ['1440 exhibitions list', 'about', 1440, '.list', (b) => [b.x, b.y, b.w], [40, 925, 900]],
+  ['1440 About h1', 'about', 1440, 'h1', (b) => [b.x, b.y], [500, 55]],
+  // the biography's last baseline stands on the foot of the portrait
+  ['1440 bio', 'about', 1440, '.bio', (b) => [b.x, Math.round(b.bottom), b.w], [500, 633, 440]],
+  ['1440 quotation', 'about', 1440, '.quotation', (b) => [b.x, b.y, b.w], [500, 788, 785]],
+  ['1440 affiliations label', 'about', 1440, '.band:first-of-type .label', (b) => [b.x, b.y], [40, 1306]],
+  ['1440 affiliations list', 'about', 1440, '.band:first-of-type .pairs', (b) => [b.x, b.y, b.w], [500, 1306, 900]],
+  ['1440 exhibitions label', 'about', 1440, '.band:nth-of-type(2) .label', (b) => [b.x, b.y], [39, 1495]],
+  ['1440 publications label', 'about', 1440, '.band:nth-of-type(3) .label', (b) => [b.x, b.y], [39, 2512]],
+  ['390 About h1', 'about', 390, 'h1', (b) => [b.x, b.y], [20, 588]],
+  ['390 quotation', 'about', 390, '.quotation', (b) => [b.x, b.y, b.w], [20, 1096, 350]],
+  ['390 affiliations label', 'about', 390, '.band:first-of-type .label', (b) => [b.x, b.y], [20, 1686]],
+  ['390 exhibitions label', 'about', 390, '.band:nth-of-type(2) .label', (b) => [b.x, b.y], [19, 1935]],
 
-  /* step 4 -- D4-Contact */
+  /* D5-Contact and D5-Phone-Contact */
   ['1440 wall', 'contact', 1440, '.wall', (b) => [b.x, b.y, b.w, b.h], [40, 64, 900, 700]],
   ['1440 print frame', 'contact', 1440, '.fr', (b) => [Math.round(b.x), Math.round(b.y), Math.round(b.w)], [198, 202, 584]],
   ['1440 plaque', 'contact', 1440, '.plaque', (b) => [b.x, Math.round(b.y)], [59, 733]],
   ['1440 wall caption', 'contact', 1440, '.wallcap', (b) => [b.x, Math.round(b.y)], [40, 772]],
-  ['1440 Contact h1', 'contact', 1440, 'h1', (b) => [b.x, b.y], [959, 58]],
+  ['1440 Contact h1', 'contact', 1440, 'h1', (b) => [b.x, b.y], [958, 55]],
+  ['1440 Contact sentence', 'contact', 1440, '.sentence', (b) => [b.x, b.y], [960, 152]],
+  ['390 wall', 'contact', 390, '.wall', (b) => [b.x, b.y, b.w, b.h], [20, 64, 350, 350]],
+  ['390 print frame', 'contact', 390, '.fr', (b) => [Math.round(b.x), Math.round(b.y), Math.round(b.w)], [62, 141, 266]],
+  ['390 plaque', 'contact', 390, '.plaque', (b) => [b.x, Math.round(b.y)], [31, 391]],
+  ['390 Contact h1', 'contact', 390, 'h1', (b) => [b.x, b.y], [19, 507]],
+  ['390 Contact sentence', 'contact', 390, '.sentence', (b) => [b.x, b.y], [20, 571]],
   ['1440 first row value', 'contact', 1440, '.row .value a', (b) => [b.x, Math.round(b.y)], [1075, 642]],
 
-  /* step 5 -- D4-Series-Days and D4-Series-Vertical. Every text position
-     is the board's. The frame boxes are derived rather than drawn (293
-     where the board has 292, 487 where it has 488), so the way on, which
-     sits in the last row, carries that difference times the row count.
-     The frames start 75px under the TALLEST of the three head modules,
-     not the side column as the board implies: on Days at Sea the
-     statement runs 3px lower than the attribution, hence 355 for the
-     board's 352. Anything else overlaps the frames on the long
-     statements (Six Days on an Island, Sense of Freedom). */
-  ['1440 series h1', 'days-at-sea', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
-  ['1440 series years', 'days-at-sea', 1440, '.years', (b) => [b.x, b.y], [40, 93]],
-  ['1440 epigraph', 'days-at-sea', 1440, '.epigraph', (b) => [b.x, b.y], [40, 224]],
-  ['1440 epigraph source', 'days-at-sea', 1440, '.attribution', (b) => [b.x, b.y], [40, 261]],
-  ['1440 statement col 1', 'days-at-sea', 1440, '.statement', (b) => [b.x, b.y, b.w], [500, 56, 440]],
-  ['1440 statement col 2', 'days-at-sea', 1440, '.statement + .statement', (b) => [b.x, b.y, b.w], [960, 56, 440]],
-  ['1440 first frame', 'days-at-sea', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 355, 440, 293]],
-  ['1440 third frame in row', 'days-at-sea', 1440, '.cell:nth-child(3) .box', (b) => [b.x, b.y], [960, 355]],
-  ['1440 portrait frame', 'vertical-summer', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 184, 325, 487]],
-  ['1440 fourth portrait frame', 'vertical-summer', 1440, '.cell:nth-child(4) .box', (b) => [b.x, b.y], [1075, 184]],
-  ['1440 way on label', 'vertical-summer', 1440, '.next-label', (b) => [b.x, b.y], [1074, 1194]],
-  ['1440 way on title', 'vertical-summer', 1440, '.next-title', (b) => [b.x, b.y], [1073, 1221]],
-  ['1440 way on years', 'vertical-summer', 1440, '.next-years', (b) => [b.x, b.y], [1075, 1263]],
-  ['1440 back, 5 under the cell', 'vertical-summer', 1440, '.back', (b) => [b.x, b.y], [1074, 1674]],
-  ['390 series h1', 'days-at-sea', 390, 'h1', (b) => [b.x, b.y], [18, 58]],
-  ['390 epigraph', 'days-at-sea', 390, '.epigraph', (b) => [b.x, b.y], [20, 136]],
-  ['390 epigraph source', 'days-at-sea', 390, '.attribution', (b) => [b.x, b.y], [20, 201]],
-  ['390 statement', 'days-at-sea', 390, '.statement', (b) => [b.x, b.y, b.w], [20, 244, 350]],
-  ['390 first frame', 'days-at-sea', 390, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [20, 744, 350, 233]],
+  /* Designs 5 -- D5-Series-Days and D5-Series-Vertical. The title and
+     the years stand alone in the margin and one text column runs down
+     the axis. The frame boxes are derived rather than drawn (293 where
+     the board has 292, 487 where it has 488), so the way on, which sits
+     in the last row, carries that difference times the row count. */
+  ['1440 series h1', 'days-at-sea', 1440, 'h1', (b) => [b.x, b.y], [36, 55]],
+  ['1440 series years', 'days-at-sea', 1440, '.years', (b) => [b.x, b.y], [40, 124]],
+  ['1440 epigraph', 'days-at-sea', 1440, '.epigraph', (b) => [b.x, b.y, b.w], [500, 56, 440]],
+  ['1440 epigraph source', 'days-at-sea', 1440, '.attribution', (b) => [b.x, b.y], [500, 93]],
+  ['1440 statement', 'days-at-sea', 1440, '.statement', (b) => [b.x, b.y, b.w], [500, 140, 440]],
+  ['1440 first frame', 'days-at-sea', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 576, 440, 293]],
+  ['1440 third frame in row', 'days-at-sea', 1440, '.cell:nth-child(3) .box', (b) => [b.x, b.y], [960, 576]],
+  ['1440 series h1, no text', 'vertical-summer', 1440, 'h1', (b) => [b.x, b.y], [40, 55]],
+  ['1440 portrait frame', 'vertical-summer', 1440, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [40, 216, 325, 487]],
+  ['1440 fourth portrait frame', 'vertical-summer', 1440, '.cell:nth-child(4) .box', (b) => [b.x, b.y], [1075, 216]],
+  // the way on: its label's cap-top on the row, the title one rhythm under
+  ['1440 way on label', 'days-at-sea', 1440, '.next-label', (b) => [b.x, b.y], [959, 2454]],
+  ['1440 way on title', 'days-at-sea', 1440, '.next-title', (b) => [b.x, b.y], [960, 2482]],
+  ['1440 way on years', 'days-at-sea', 1440, '.next-years', (b) => [b.x, b.y], [960, 2524]],
+  ['1440 back, 5 under the cell', 'days-at-sea', 1440, '.back', (b) => [b.x, b.y], [959, 2741]],
+  ['390 series h1', 'days-at-sea', 390, 'h1', (b) => [b.x, b.y], [17, 56]],
+  ['390 series years', 'days-at-sea', 390, '.years', (b) => [b.x, b.y], [20, 106]],
+  ['390 epigraph', 'days-at-sea', 390, '.epigraph', (b) => [b.x, b.y], [20, 149]],
+  ['390 epigraph source', 'days-at-sea', 390, '.attribution', (b) => [b.x, b.y], [20, 214]],
+  ['390 statement', 'days-at-sea', 390, '.statement', (b) => [b.x, b.y, b.w], [20, 257, 350]],
+  ['390 first frame', 'days-at-sea', 390, '.cell .box', (b) => [b.x, b.y, b.w, b.h], [20, 757, 350, 233]],
 
   /* step 6 -- D4-Viewer-1, D4-Viewer-2, D4-Phone-Viewer-1. The plate is
      fitted from each photograph's real ratio (1.4995, not an exact 3:2),
@@ -122,20 +136,18 @@ const CHECKS = [
      which is up for six seconds. */
   ['1440 home plate', 'home', 1440, '.slide[data-slide="0"] .box', (b) => [b.x, b.y, b.w, b.h], [40, 64, 1015, 676]],
   ['1440 home caption', 'home', 1440, '[data-caption="0"]', (b) => [b.x, b.y], [40, 748]],
-  ['1440 home counter', 'home', 1440, '#counter', (b) => [b.x, b.y], [1075, 748]],
   ['1440 home controls', 'home', 1440, '.controls', (b) => [b.right, b.y], [1400, 745]],
   ['390 home plate', 'home', 390, '.slide[data-slide="0"] .box', (b) => [b.x, b.y, b.w, b.h], [20, 536, 350, 233]],
   ['390 home caption', 'home', 390, '[data-caption="0"]', (b) => [b.x, b.y], [20, 777]],
-  ['390 home counter', 'home', 390, '#counter', (b) => [b.right, b.y], [370, 777]],
   ['390 home controls', 'home', 390, '.controls', (b) => [b.right, b.y], [370, 790]],
 
-  /* step 4 -- D4-404 */
-  ['1440 404 h1', '404', 1440, 'h1', (b) => [b.x, b.y], [38, 58]],
+  /* D5-404 and D5-Phone-404 */
+  ['1440 404 h1', '404', 1440, 'h1', (b) => [b.x, b.y], [36, 55]],
   ['1440 404 sentence', '404', 1440, '.aside p', (b) => [b.x, b.y, b.w], [500, 56, 440]],
   ['1440 404 first link', '404', 1440, '.links a', (b) => [b.x, b.y], [499, 146]],
-  ['390 404 h1', '404', 390, 'h1', (b) => [b.x, b.y], [18, 58]],
-  ['390 404 sentence', '404', 390, '.aside p', (b) => [b.x, b.y, b.w], [20, 112, 350]],
-  ['390 404 first link', '404', 390, '.links a', (b) => [b.x, b.y], [19, 202]],
+  ['390 404 h1', '404', 390, 'h1', (b) => [b.x, b.y], [17, 56]],
+  ['390 404 sentence', '404', 390, '.aside p', (b) => [b.x, b.y, b.w], [20, 121, 350]],
+  ['390 404 first link', '404', 390, '.links a', (b) => [b.x, b.y], [19, 211]],
 ];
 
 const box = (page, selector, read) =>

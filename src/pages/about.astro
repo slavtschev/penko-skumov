@@ -2,12 +2,14 @@
 import { getEntry } from 'astro:content';
 import Frame from '../components/Frame.astro';
 import Page from '../layouts/Page.astro';
-import { inkLeft } from '../lib/ink';
+import { capGapAfterBaseline, capTop, descent, inkLeft } from '../lib/ink';
 import { firstSentence } from '../lib/site';
 
-/* D4-About: the portrait, its caption and the affiliations in columns 1-4;
-   the title and bio in 5-8; the quotation in 9-12. Then Exhibitions and
-   Awards across 1-8 with the year in column 1, and Publications in 9-12. */
+/* D5-About. The Designs 5 axis: the portrait alone in the left margin,
+   the title and the biography on column 5, the quotation across seven
+   columns under them, and then three sections -- each an h2 Label on the
+   margin and a list of year-and-entry rows on the axis.
+   D5-Phone-About: one column in the same order, labels above lists. */
 
 const aboutEntry = await getEntry('about', 'about');
 const about = aboutEntry!.data;
@@ -16,19 +18,46 @@ const quotation = homeEntry!.data.quotation;
 
 const TITLE = 'About';
 
-const exhibitionsLabel = 'Exhibitions and awards, 2000–2025';
-const publicationsLabel = 'Publications, 2005–2024';
+/* No date ranges in the labels any more (Designs 5). */
+const sections = [
+  { label: 'Affiliations', rows: about.affiliations.map((a) => ({ year: a.years, html: a.html })) },
+  { label: 'Exhibitions and awards', rows: [] as { year: string; html: string }[] },
+  { label: 'Publications', rows: [] as { year: string; html: string }[] },
+];
 
 /* Each year group prints its year once, on its first entry. */
 const rowsOf = (groups: { year: string; entries: string[] }[]) =>
   groups.flatMap((g) => g.entries.map((html, i) => ({ year: i === 0 ? g.year : '', html })));
 
-const exhibitions = rowsOf(about.exhibitions);
-const publications = rowsOf(about.publications);
+sections[1].rows = rowsOf(about.exhibitions);
+sections[2].rows = rowsOf(about.publications);
+
+/*
+  The vertical rules, all read off D5-About and D5-Phone-About:
+
+  - the biography's last baseline stands on the foot of the portrait;
+  - the quotation's cap-top sits 144 under the foot of the portrait
+    caption's line box, and the first section's 144 under the
+    quotation's last baseline;
+  - every later section's cap-top sits 114 under the last baseline of
+    the list above it (the handoff says 112; the board draws 114).
+
+  The portrait caption is gone (Dimitar, 09.11) but the space it held is
+  not: the quotation still starts where the board puts it. On the phone
+  the title stands 61 under that same line instead, and the distances
+  are the phone board's 98 and 52.
+*/
+const captionBlock = 8 + 16; // the caption's gap and its line box
+const quoteGap = Math.ceil(captionBlock + 144 - capTop('quote'));
+const titleGapXs = captionBlock + 61;
+const bandGapFirst = capGapAfterBaseline('quote', 'ui', 144);
+const bandGap = capGapAfterBaseline('ui', 'ui', 114);
+const bandGapFirstXs = capGapAfterBaseline('text', 'label', 98);
+const bandGapXs = capGapAfterBaseline('ui', 'label', 98);
 ---
 
 <Page title={TITLE} current="about" description={firstSentence(about.bio[0] ?? null)}>
-  <div class="grid about">
+  <div class="grid head">
     <div class="portrait span-4 start-1">
       {
         about.portrait && (
@@ -36,66 +65,109 @@ const publications = rowsOf(about.publications);
             file={about.portrait.file}
             width={about.portrait.width}
             height={about.portrait.height}
-            alt={`Penko Skumov`}
+            alt="Penko Skumov"
             span={4}
             priority={true}
           />
         )
       }
-      <dl class="pairs affiliations">
-        {
-          about.affiliations.map((a) => (
-            <div class="pair">
-              <dt class="t-caption year">{a.years}</dt>
-              <dd class="t-ui entry" set:html={a.html} />
-            </div>
-          ))
-        }
-      </dl>
     </div>
 
     <div class="intro span-4 start-5">
-      <h1 class="t-title ink-top" style={`margin-left: -${inkLeft(TITLE, 'title')}px`}>{TITLE}</h1>
-      {about.bio.map((p) => <p class="t-text bio">{p}</p>)}
+      <h1
+        class="t-display ink-top"
+        style={`--ink-l: ${inkLeft(TITLE, 'display')}px; --ink-l-xs: ${inkLeft(TITLE, 'displayXs')}px`}>
+        {TITLE}
+      </h1>
+      <div class="bio">
+        {about.bio.map((p) => <p class="t-text">{p}</p>)}
+      </div>
     </div>
-
-    <blockquote class="quotation t-text span-4 start-9">{quotation}</blockquote>
-
-    <h2 class="t-caption label span-8 start-1" style={`margin-left: -${inkLeft(exhibitionsLabel, 'caption')}px`}>
-      {exhibitionsLabel}
-    </h2>
-    <h2 class="t-caption label span-4 start-9" style={`margin-left: -${inkLeft(publicationsLabel, 'caption')}px`}>
-      {publicationsLabel}
-    </h2>
-
-    <dl class="pairs list span-8 start-1">
-      {
-        exhibitions.map((r) => (
-          <div class="pair">
-            <dt class="t-caption year">{r.year}</dt>
-            <dd class="t-ui entry" set:html={r.html} />
-          </div>
-        ))
-      }
-    </dl>
-
-    <dl class="pairs list span-4 start-9">
-      {
-        publications.map((r) => (
-          <div class="pair">
-            <dt class="t-caption year">{r.year}</dt>
-            <dd class="t-ui entry" set:html={r.html} />
-          </div>
-        ))
-      }
-    </dl>
   </div>
+
+  <div class="grid">
+    {/* seven columns, 785 at the L tier the boards are drawn on */}
+    <blockquote class="quotation t-quote span-7 start-5">{quotation}</blockquote>
+  </div>
+
+  {
+    sections.map((section) => (
+      <section class="band grid">
+        <h2 class="t-label label span-4 start-1" style={`margin-left: -${inkLeft(section.label, 'label')}px`}>
+          {section.label}
+        </h2>
+        <dl class="pairs subgrid span-8 start-5">
+          {section.rows.map((row) => (
+            <div class="pair">
+              <dt class="t-caption year">{row.year}</dt>
+              <dd class="t-ui entry" set:html={row.html} />
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))
+  }
 </Page>
 
-<style>
-  .about {
+<style
+  define:vars={{
+    quoteGap: `${quoteGap}px`,
+    titleGapXs: `${titleGapXs}px`,
+    bandGapFirst: `${bandGapFirst}px`,
+    bandGap: `${bandGap}px`,
+    bandGapFirstXs: `${bandGapFirstXs}px`,
+    bandGapXs: `${bandGapXs}px`,
+    textDescent: `${descent('text').toFixed(3)}px`,
+  }}>
+  .head {
     row-gap: 0;
-    align-items: start;
+  }
+
+  h1 {
+    white-space: nowrap;
+    margin-left: calc(-1 * var(--ink-l));
+  }
+
+  /* The title stands on the portrait's top line and the biography's last
+     baseline on its foot, so the column is read from both ends. */
+  .intro {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .bio {
+    margin-top: auto;
+    /* the last baseline on the foot of the portrait, not the line box */
+    margin-bottom: calc(-1 * var(--textDescent));
+    text-wrap: pretty;
+  }
+
+  .bio p + p {
+    margin-top: var(--rhythm);
+  }
+
+  .quotation {
+    display: block;
+    margin: 0;
+    margin-top: var(--quoteGap);
+    text-wrap: pretty;
+  }
+
+  /* --- the three sections ---------------------------------------------- */
+  .band {
+    row-gap: 0;
+    margin-top: var(--bandGap);
+  }
+
+  .band:first-of-type {
+    margin-top: var(--bandGapFirst);
+  }
+
+  /* the label stays with its list for the length of it */
+  .label {
+    position: sticky;
+    top: var(--header);
+    align-self: start;
   }
 
   /* year in column 1 of the module, entry from column 2 on */
@@ -130,87 +202,53 @@ const publications = rowsOf(about.publications);
     text-underline-offset: 3px;
   }
 
-  .portrait,
-  .intro {
-    display: grid;
-    grid-template-columns: subgrid;
-  }
-
-  /* :global, because the Frame component's root carries its own scope
-     attribute and a plain child selector would not reach it */
-  .portrait > :global(*),
-  .intro > :global(*) {
-    grid-column: 1 / -1;
-  }
-
-  .affiliations {
-    grid-column: 1 / -1;
-    /* the caption that used to sit here is gone, so the affiliations take
-       its place under the portrait */
-    margin-top: calc(var(--caption-gap) + var(--caption-line) + 38px);
-  }
-
-  .bio {
-    margin-top: 22px;
-    text-wrap: pretty;
-  }
-
-  /* the quotation starts on the bio's line, not on the title's */
-  .quotation {
-    margin: 0;
-    margin-top: calc(var(--title-line) + 22px - var(--cap-int-title));
-    color: var(--grey);
-    text-wrap: pretty;
-  }
-
-  .label {
-    margin-top: 98px;
-    align-self: end;
-  }
-
-  .list {
-    margin-top: 19px;
-  }
-
-  /* Phone: one column. */
+  /* --- the phone: one column, labels above lists ------------------------ */
   @media (max-width: 1023px) {
-    .about > * {
+    .head > *,
+    .band > *,
+    .quotation {
       grid-column: 1 / -1;
     }
 
-    .portrait,
     .intro {
       display: block;
+      margin-top: var(--titleGapXs);
     }
 
-    .pairs {
-      display: block;
+    .bio {
+      margin-top: 24px;
+      margin-bottom: 0;
     }
 
-    .pair {
-      display: block;
-      padding-bottom: 20px;
-    }
-
-    .year:empty {
-      display: none;
-    }
-
-    .year {
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .intro {
-      margin-top: 44px;
-    }
-
+    /* 18/28 and grey on the phone, where 28/32 would not fit the measure */
     .quotation {
-      margin-top: 44px;
+      font: 400 var(--text-size) / var(--text-line) var(--family);
+      letter-spacing: 0;
+      color: var(--grey);
+      margin-top: 52px;
+    }
+
+    .band {
+      margin-top: var(--bandGapXs);
+    }
+
+    .band:first-of-type {
+      margin-top: var(--bandGapFirstXs);
     }
 
     .label {
-      margin-top: 60px;
+      position: static;
+      margin-bottom: 16px;
+    }
+
+    /* the year keeps its own column -- D5-Phone-About narrows it to 90,
+       which is one column and one gutter at the XS tier, the same rule
+       the page tier uses */
+  }
+
+  @media (max-width: 767px) {
+    h1 {
+      margin-left: calc(-1 * var(--ink-l-xs));
     }
   }
 </style>

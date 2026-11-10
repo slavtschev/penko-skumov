@@ -16,7 +16,16 @@ import metrics from './satoshi-metrics.json';
  * 18 / 20 / 19, the small grey labels at 39, the h1 at 38, cap-tops on 64.
  */
 
-export type StyleName = 'name' | 'ui' | 'caption' | 'title' | 'text';
+export type StyleName =
+  | 'display'
+  | 'displayXs'
+  | 'name'
+  | 'label'
+  | 'ui'
+  | 'caption'
+  | 'title'
+  | 'quote'
+  | 'text';
 
 interface TypeStyle {
   /** font-size in px */
@@ -37,10 +46,19 @@ interface TypeStyle {
 }
 
 export const styles: Record<StyleName, TypeStyle> = {
+  /* Designs 5: the page title, the one h1 on a page. 400, not 500 --
+     the weight-400 file, never a synthetic bold. */
+  display: { size: 56, line: 56, weight: 400, tracking: -0.03, caps: false, underline: 1 },
+  displayXs: { size: 36, line: 40, weight: 400, tracking: -0.02, caps: false, underline: 1 },
+  /* Designs 5: section headings (h2). The same style as the site name. */
+  label: { size: 14, line: 20, weight: 500, tracking: 0.16, caps: true, underline: 1 },
   name: { size: 14, line: 20, weight: 500, tracking: 0.16, caps: true, underline: 1 },
   ui: { size: 14, line: 20, weight: 400, tracking: 0, caps: false, underline: 1 },
   caption: { size: 12, line: 16, weight: 400, tracking: 0, caps: false, underline: -1 },
   title: { size: 28, line: 32, weight: 500, tracking: -0.01, caps: false, underline: 2 },
+  /* Designs 5: the About quotation. The title's size and line at 400,
+     which is a different face and different bearings. */
+  quote: { size: 28, line: 32, weight: 400, tracking: -0.01, caps: false, underline: 2 },
   text: { size: 18, line: 28, weight: 400, tracking: 0, caps: false, underline: 1 },
 };
 
@@ -108,7 +126,8 @@ export function inkRight(text: string, name: StyleName): number {
  * cannot drift apart. Swapping the typeface regenerates both.
  */
 export function inkTokens(): string {
-  const lines = (Object.keys(styles) as StyleName[]).flatMap((name) => [
+  const emitted = (Object.keys(styles) as StyleName[]).filter((n) => n !== 'displayXs');
+  const lines = emitted.flatMap((name) => [
     `--cap-${name}: ${capTop(name).toFixed(3)}px;`,
     `--base-${name}: ${baseline(name).toFixed(3)}px;`,
     // whole pixels, so a line pulled onto a cap-top keeps its box on an
@@ -118,7 +137,35 @@ export function inkTokens(): string {
   // how far a 12/16 caption's box sits below a 14/20 line sharing its
   // baseline -- the viewer's bottom row is set that way
   lines.push(`--caption-drop: ${Math.ceil(baseline('ui') - baseline('caption'))}px;`);
-  return `:root{${lines.join('')}}`;
+
+  /* The Display style is 56/56 on the page and 36/40 on the phone, so its
+     ink offsets change with the tier. One name, two values. */
+  const xs = [
+    `--cap-display: ${capTop('displayXs').toFixed(3)}px;`,
+    `--base-display: ${baseline('displayXs').toFixed(3)}px;`,
+    `--cap-int-display: ${Math.floor(capTop('displayXs'))}px;`,
+  ].join('');
+
+  return `:root{${lines.join('')}}@media (max-width:767px){:root{${xs}}}`;
+}
+
+/** The space under the baseline inside the line box, in px. */
+export function descent(name: StyleName): number {
+  return styles[name].line - baseline(name);
+}
+
+/**
+ * The gap to set between two stacked boxes so that `gap` separates the
+ * first's baseline from the second's cap-top -- which is how the Designs 5
+ * boards space a list from the heading of the next section.
+ */
+export function capGapAfterBaseline(from: StyleName, to: StyleName, gap: number): number {
+  return Math.ceil(gap - descent(from) - capTop(to));
+}
+
+/** How much lower `a`'s box sits than `b`'s when their cap-tops align. */
+export function capOffset(a: StyleName, b: StyleName): number {
+  return Math.round(capTop(a) - capTop(b));
 }
 
 /**

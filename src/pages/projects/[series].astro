@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 import Frame from '../../components/Frame.astro';
 import Page from '../../layouts/Page.astro';
 import Speculate from '../../components/Speculate.astro';
-import { inkLeft, inkRight } from '../../lib/ink';
+import { boxTopForCap, capTop, descent, inkLeft, inkRight, styles } from '../../lib/ink';
 import { firstSentence } from '../../lib/site';
 
 /* D4-Series-Days and D4-Series-Vertical. Title, years, epigraph and
@@ -38,11 +38,9 @@ const portrait = frames[0].width < frames[0].height;
 const span = portrait ? 3 : 4;
 const perRow = portrait ? 4 : 3;
 
-/* The statement runs across modules 5-8 and 9-12, the first taking the
-   extra paragraph where they do not divide evenly. */
+/* Designs 5: one text column on the axis, never two side by side. */
 const paragraphs = series.statement ? series.statement.split('\n').filter(Boolean) : [];
-const half = Math.ceil(paragraphs.length / 2);
-const columns = paragraphs.length ? [paragraphs.slice(0, half), paragraphs.slice(half)] : [];
+const hasText = Boolean(series.epigraph || paragraphs.length);
 
 /* An epigraph that opens with a quotation mark is set flush, as the boards
    do: you do not align a measure on a quote mark -- if anything it hangs
@@ -50,7 +48,27 @@ const columns = paragraphs.length ? [paragraphs.slice(0, half), paragraphs.slice
 const opensWithQuote = /^[“‘"']/.test(series.epigraph ?? '');
 const epigraphInk = series.epigraph && !opensWithQuote ? inkLeft(series.epigraph, 'text') : 0;
 
-const titleInk = inkLeft(series.title, 'title');
+/* The years' cap-top sits 64 under the title's on the page and 46 on the
+   phone -- D5-Series-Days and D5-Phone-Series; the distance follows no
+   rule I could derive, so it is the boards'. As a margin under the
+   title's line box, which is where the years fall in the flow. */
+const yearsGap = (tier: 'L' | 'XS') => {
+  const face = tier === 'L' ? 'display' : 'displayXs';
+  const titleBottom = 64 - Math.floor(capTop(face)) + styles[face].line;
+  return boxTopForCap('caption', 64 + (tier === 'L' ? 64 : 46)) - titleBottom;
+};
+
+/* The frames begin 80 under the last baseline of the text on the page and
+   52 under it on the phone (D5-Series-Days, D5-Phone-Series). Measured to
+   the box, and floored, because a frame sits on a whole pixel. */
+const framesGap = Math.floor(80 - descent('text'));
+const framesGapXs = 52;
+/* with no text at all they follow the years (D5-Series-Vertical: 216) */
+const framesGapBare = Math.floor(80 - descent('caption'));
+
+const titleInk = inkLeft(series.title, 'display');
+const titleInkXs = inkLeft(series.title, 'displayXs');
+const NEXT = 'Next';
 const nextInk = { l: inkLeft(next.title, 'title'), r: inkRight(next.title, 'title') };
 /* the opening of the statement, or the plain facts where there is none */
 const description =
@@ -63,37 +81,41 @@ const backInk = inkLeft(BACK, 'caption');
 
 <Page title={series.title} current="projects" description={description}>
   <div class="grid head">
-    <div class="side span-4 start-1">
-      <h1 class="t-title ink-top" style={`margin-left: -${titleInk}px`}>{series.title}</h1>
+    <div class="name span-4 start-1">
+      <h1
+        class="t-display ink-top"
+        style={`--ink-l: ${titleInk}px; --ink-l-xs: ${titleInkXs}px`}>
+        {series.title}
+      </h1>
       <p class="t-caption years" style={`margin-left: -${inkLeft(series.years, 'caption')}px`}>
         {series.years}
       </p>
-      {
-        series.epigraph && (
-          <p class="t-text epigraph" style={`margin-left: -${epigraphInk}px`}>
-            {series.epigraph}
-          </p>
-        )
-      }
-      {
-        series.epigraphSource && (
-          <p
-            class="t-caption attribution"
-            style={`margin-left: -${inkLeft(series.epigraphSource, 'caption')}px`}>
-            {series.epigraphSource}
-          </p>
-        )
-      }
     </div>
 
     {
-      columns.map((column, i) => (
-        <div class:list={['statement', 'ink-top', 'span-4', i === 0 ? 'start-5' : 'start-9']}>
-          {column.map((text) => (
-            <p class="t-text">{text}</p>
-          ))}
+      hasText && (
+        <div class="text ink-top span-4 start-5">
+          {series.epigraph && (
+            <p class="t-text epigraph" style={`margin-left: -${epigraphInk}px`}>
+              {series.epigraph}
+            </p>
+          )}
+          {series.epigraphSource && (
+            <p
+              class="t-caption attribution"
+              style={`margin-left: -${inkLeft(series.epigraphSource, 'caption')}px`}>
+              {series.epigraphSource}
+            </p>
+          )}
+          {paragraphs.length > 0 && (
+            <div class="statement">
+              {paragraphs.map((text) => (
+                <p class="t-text">{text}</p>
+              ))}
+            </div>
+          )}
         </div>
-      ))
+      )
     }
   </div>
 
@@ -121,8 +143,8 @@ const backInk = inkLeft(BACK, 'caption');
 
     <div class:list={['wayon', `span-${span}`]}>
       <div class="wayon-box">
-      <p class="t-caption ink-top next-label" style={`margin-left: -${inkLeft('Next', 'caption')}px`}>
-        Next
+      <p class="t-label ink-top next-label" style={`margin-left: -${inkLeft(NEXT, 'label')}px`}>
+        {NEXT}
       </p>
       <a
         class="u t-title next-title"
@@ -145,21 +167,41 @@ const backInk = inkLeft(BACK, 'caption');
   <Speculate match="/projects/*" />
 </Page>
 
-<style>
+<style
+  define:vars={{
+    yearsGap: `${yearsGap('L')}px`,
+    yearsGapXs: `${yearsGap('XS')}px`,
+    framesGap: `${framesGap}px`,
+    framesGapXs: `${framesGapXs}px`,
+    framesGapBare: `${framesGapBare}px`,
+    titleInk: `${titleInk}px`,
+    titleInkXs: `${titleInkXs}px`,
+  }}>
   .head {
     row-gap: 0;
   }
 
-  .head {
-    position: relative;
+  /* --- the left margin: the title and the years, and nothing else ----- */
+  h1 {
+    white-space: nowrap;
+    margin-left: calc(-1 * var(--titleInk));
   }
 
   .years {
-    margin-top: 3px;
+    margin-top: var(--yearsGap);
+  }
+
+  /* --- the text, one column on the axis ------------------------------
+     The epigraph's first line stands on the title's cap-top; its source
+     follows one rhythm under its last baseline and the statement two
+     under that. The boards set 9 and 31 between the boxes, which is
+     those two rules to within a pixel. */
+  .text {
+    --ink-cap-int: var(--cap-int-text);
+    text-wrap: pretty;
   }
 
   .epigraph {
-    margin-top: 115px;
     color: var(--grey);
   }
 
@@ -167,21 +209,8 @@ const backInk = inkLeft(BACK, 'caption');
     margin-top: 9px;
   }
 
-  /*
-    The frames clear the TALLEST of the three modules by 75px.
-
-    This supersedes what step 5 did. D4-Series-Days puts the frames 75
-    under the side column and only 44 under the statement, and matching
-    that exactly meant taking the statement out of the row's height --
-    which worked on that board because its statement is short. On six of
-    the eleven series it is not, and the statement ran underneath the
-    photographs. Clearing the tallest column costs 31px against the board
-    on Days at Sea and is correct everywhere.
-  */
-
   .statement {
-    --ink-cap-int: var(--cap-int-text);
-    text-wrap: pretty;
+    margin-top: 31px;
   }
 
   .statement p + p {
@@ -191,7 +220,12 @@ const backInk = inkLeft(BACK, 'caption');
   /* --- the frames ------------------------------------------------------ */
   .frames {
     row-gap: 20px;
-    margin-top: 75px;
+    margin-top: var(--framesGap);
+  }
+
+  /* a series with no text at all follows the years instead */
+  .head:not(:has(.text)) + .frames {
+    margin-top: var(--framesGapBare);
   }
 
   .cell {
@@ -199,9 +233,11 @@ const backInk = inkLeft(BACK, 'caption');
   }
 
   /* --- the way on ------------------------------------------------------ */
+  /* the title's box one rhythm under the label's, as D5-Series-Days
+     draws it (2443 and 2471) */
   .next-title {
     display: block;
-    margin-top: 11px;
+    margin-top: calc(var(--rhythm) - var(--name-line));
     white-space: nowrap;
   }
 
@@ -248,41 +284,37 @@ const backInk = inkLeft(BACK, 'caption');
     }
   }
 
-  /* Phone: one column. The epigraph and its attribution come before the
-     statement, and nothing is bottom-aligned. */
+  /* Phone: one column, the text under the title and the years, labels
+     above what they name. */
   @media (max-width: 1023px) {
     .head > * {
       grid-column: 1 / -1;
     }
 
-    .side {
-      position: static;
-    }
-
-    .epigraph {
-      position: static;
+    .text {
       margin-top: 27px;
     }
+  }
 
-    .attribution {
-      position: static;
-      margin-top: 9px;
+  @media (max-width: 767px) {
+    h1 {
+      margin-left: calc(-1 * var(--titleInkXs));
     }
 
+    .years {
+      margin-top: var(--yearsGapXs);
+    }
+
+    /* D5-Phone-Series sets 27 between the source and the statement where
+       the page sets 31 */
     .statement {
       margin-top: 27px;
     }
 
-    /* the split is a desktop device; on one column they are one block */
-    .statement + .statement {
-      margin-top: var(--rhythm);
-    }
-
     .frames {
       row-gap: 12px;
-      /* D4-Phone-Series sets the frames 52 under the text, where the
-         desktop boards set them 75 under the side column */
-      margin-top: 52px;
+      /* D5-Phone-Series sets the frames 52 under the text */
+      margin-top: var(--framesGapXs);
     }
 
     .cell {
@@ -307,3 +339,13 @@ const backInk = inkLeft(BACK, 'caption');
     }
   }
 </style>
+
+<script>
+  /* Opening a photograph shows it over this page rather than leaving it;
+     the frame's own page is still what the overlay is made of, and still
+     what a direct link, a shared link or a reader without JavaScript
+     gets. */
+  import { mountViewerOverlay } from '../../lib/viewer-overlay';
+
+  mountViewerOverlay(window.location.pathname);
+</script>

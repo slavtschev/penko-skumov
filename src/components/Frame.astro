@@ -169,25 +169,7 @@ if (!src) {
 </style>
 
 <script>
-  /**
-   * Dissolve each photograph in when it has decoded. A cached image can be
-   * complete before this runs, so check that first; `decode()` resolves
-   * once the pixels are ready to paint, which `load` alone does not promise.
-   */
-  const reveal = (frame: Element) => frame.classList.add('in');
+  import { revealFrames } from '../lib/reveal';
 
-  for (const frame of document.querySelectorAll<HTMLElement>('.frame')) {
-    const img = frame.querySelector('img');
-    if (!img) continue;
-    if (img.complete && img.naturalWidth > 0) {
-      /* already on screen as far as the reader is concerned: cut it in */
-      frame.classList.add('cut');
-      reveal(frame);
-      continue;
-    }
-    img
-      .decode()
-      .then(() => reveal(frame))
-      .catch(() => reveal(frame)); // a broken photograph should not stay invisible
-  }
+  revealFrames();
 </script>
