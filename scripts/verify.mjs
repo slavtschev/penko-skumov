@@ -38,23 +38,21 @@ const CHECKS = [
   ['390 menu Contact', 'menu', 390, '.sheet-nav a:nth-child(3)', (b) => [b.x, b.y], [19, 154]],
   ['390 menu Close', 'menu', 390, '.sheet .close span', (b) => [b.right, b.y], [370, 22]],
 
-  /* Designs 5 -- D5-Projects and D5-Phone-Projects. The h1 sits 1px
-     below and 1px right of the board on every Display line: the board's
-     own cap-top and side bearing for 56/56 are a pixel coarser than the
-     ones derived from the font (CLAUDE.md). Everything else is exact. */
-  ['1440 Projects h1', 'projects', 1440, 'h1', (b) => [b.x, b.y], [36, 55]],
-  ['1440 first series title', 'projects', 1440, '.rows .title', (b) => [b.x, b.y], [613, 58]],
-  ['1440 first series year', 'projects', 1440, '.rows .year', (b) => [b.x, b.y], [500, 72]],
-  ['1440 Archive label', 'projects', 1440, '.label', (b) => [b.x, b.y], [40, 512]],
-  ['1440 first archive title', 'projects', 1440, '.archive .title', (b) => [b.x, b.y], [613, 511]],
+  /* D4-Projects and D4-Phone-Projects, kept on purpose: Designs 5
+     redrew this page and Dimitar dropped the redraw (11.11). The two
+     lists stay in columns 1-4 and 5-8 under their small grey captions,
+     and the preview keeps 9-12. */
+  ['1440 Projects label', 'projects', 1440, '.label', (b) => [b.x, b.y], [39, 60]],
+  ['1440 Archive label', 'projects', 1440, '.list + .list .label', (b) => [b.x, b.y], [500, 60]],
+  ['1440 first series title', 'projects', 1440, '.title', (b) => [b.x, b.y], [153, 94]],
+  ['1440 first series year', 'projects', 1440, '.year', (b) => [b.x, b.y], [40, 108]],
   ['1440 preview slot', 'projects', 1440, '.previews', (b) => [b.x, b.w], [960, 440]],
   // the board draws 440x292; the box is derived, so 293 (see CLAUDE.md)
-  ['1440 preview frame', 'projects', 1440, '.preview[data-first] .box', (b) => [b.y, b.w, b.h], [64, 440, 293]],
-  ['390 Projects h1', 'projects', 390, 'h1', (b) => [b.x, b.y], [17, 56]],
-  ['390 first series title', 'projects', 390, '.rows .title', (b) => [b.x, b.y], [18, 134]],
-  ['390 first series year', 'projects', 390, '.rows .year', (b) => [b.x, b.y], [20, 171]],
-  ['390 Archive label', 'projects', 390, '.label', (b) => [b.x, b.y], [20, 683]],
-  ['390 first archive title', 'projects', 390, '.archive .title', (b) => [b.x, b.y], [18, 718]],
+  ['1440 preview frame', 'projects', 1440, '.preview[data-first] .box', (b) => [b.w, b.h], [440, 293]],
+  ['390 Projects label', 'projects', 390, '.label', (b) => [b.x, b.y], [19, 60]],
+  ['390 first series title', 'projects', 390, '.title', (b) => [b.x, b.y], [18, 94]],
+  ['390 first series year', 'projects', 390, '.year', (b) => [b.x, b.y], [20, 131]],
+  ['390 Archive label', 'projects', 390, '.list + .list .label', (b) => [b.x, b.y], [20, 644]],
 
   /* Designs 5 -- D5-About and D5-Phone-About. Everything below the
      portrait sits 2px above the board, which is the portrait's own

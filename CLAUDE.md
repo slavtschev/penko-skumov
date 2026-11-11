@@ -9,7 +9,8 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
 2. Home: **autoplay slideshow** with the rules below.
 3. Phone menu: **list at the top** (as drawn in D5-Phone-Menu).
 4. Headings (10.11, my decision for Dimitar to veto): section headings are the **Label** style (capitals, 14/20, 500, +0.16em); the display-size alternative is drawn on About only (D5-About-B) and is not built. Page titles are **Display** 56/56 at weight 400. The About quotation is 28/32 in ink on desktop.
-5. Defaults I chose (veto freely): the shelf stage (hung from the left margin, not centred); the quotation shown whole, held **36 s** (not the drawn 24 s: 133 words need about 32 to 40 s), so the round is **108 s**; quotation at slide 6; the burning car stays out of the Home edit; no footer on the Home.
+5. Projects keeps the Designs 4 layout and its small grey headings (Dimitar, 11.11). Display and Label do not apply to it.
+6. Defaults I chose (veto freely): the shelf stage (hung from the left margin, not centred); the quotation shown whole, held **36 s** (not the drawn 24 s: 133 words need about 32 to 40 s), so the round is **108 s**; quotation at slide 6; the burning car stays out of the Home edit; no footer on the Home.
 
 ## Decisions taken in the build (step 1, Dimitar: "you decide")
 1. Underline offset: the **boards** win over this file. The rule sits at `bottom` 1 px (14/20), -1 px (12/16), 2 px (28/32) inside the line box, which is 2.2 to 3.4 px below the baseline and follows no single distance. "4 px below the text" above is superseded; it did not match any board.
@@ -60,14 +61,15 @@ Owner: Dimitar Slavchev (designer). Client: Penko Skumov (photographer). The sit
     - the epigraph's source sits one rhythm under the epigraph's last baseline and the statement two under the source -- 9 and 31 between the boxes on the page, 9 and 27 on the phone;
     - the frames begin 80 under the last baseline of the text, 52 on the phone, or under the years where a series has no text (Vertical Summer: 216, exactly as drawn);
     - the way on's Label has its cap-top on the row's top edge and its title one rhythm under its box;
-    - Projects: rows 48 apart, the Archive list 96 under the last project's baseline, its label's cap-top on its first title's;
     - About: the biography's last baseline stands on the foot of the portrait, the quotation's cap-top 144 under the foot of the portrait caption's line box, the first section 144 under the quotation's last baseline and each later one 114 under the last baseline above it (the handoff says 112; the board draws 114). On the phone: 98 throughout, and the label 16 above its list.
 32. **The name under the portrait stays off About**, although D5-About and D5-Phone-About both draw it: Dimitar asked for it to go on 09.11 and the Designs 5 boards look like they were carried over from Designs 4 before that. The space it held is kept, so the quotation and everything under it start where the board puts them. **Confirm.**
 33. The About quotation is set flush on the axis, not shifted by the side bearing of its quote mark, which is decision 8 -- although D5-About shifts it 2px and D5-Series-Days leaves the epigraph flush. The two boards disagree; the rule does not.
 34. **The phone Contact wall is square.** D5-Phone-Contact draws a 350 x 350 wall with the print at 76% of its width and the handoff's own 8 and 20 for the moulding and the mat, where the build had been scaling the page's 900 x 700 wall and its 12 and 40. The plaque carries the size alone there, 7 off the foot of the wall.
 35. Each section label on About is sticky for the length of its list, which the handoff asks for and no board draws.
 36. Every viewer page carries a visually hidden h1 ("<series>, photograph n of N"), which closes the one-h1-per-page gap on the 157 of them.
-37. `npm run verify` asserts 94 positions off the Designs 5 boards at 1440 and 390, and `npm run overlaps` asserts that no two pieces of ink on any page sit on top of each other. Both are clean. The boards themselves can be rendered with real Satoshi to measure what a drawn page actually does, which is how every number above was read.
+37. `npm run verify` asserts 92 positions off the boards at 1440 and 390, and `npm run overlaps` asserts that no two pieces of ink on any page sit on top of each other. Both are clean. The boards themselves can be rendered with real Satoshi to measure what a drawn page actually does, which is how every number above was read.
+38. **Projects went back to Designs 4** (Dimitar, 11.11): the two lists in columns 1-4 and 5-8 under their 12/16 grey captions, the preview in 9-12. The Designs 5 version of the page -- one list on the axis under a Display title, which was built and measured against D5-Projects -- is dropped. The rules it was built on are still here in 31 if it ever comes back: rows 48 apart, the Archive list 96 under the last project's baseline, its label's cap-top on its first title's. Display and Label now appear on About, Series, Contact and 404 only, and `t-title` carries the names in the Projects lists as it always did.
+
 
 ## Stack and layout of the repo
 - Astro, static output, TypeScript. No UI framework needed; small vanilla scripts for the slideshow, viewer and menu.
@@ -93,7 +95,7 @@ Type, Satoshi only, ink and one grey:
 | Style | Size/line | Weight | Notes |
 |---|---|---|---|
 | display | 56/56 (phone 36/40) | 400 | -0.03em (phone -0.02em). The page title, the one h1. Use the weight-400 file; no synthetic bold |
-| label | 14/20 | 500 | capitals via `text-transform`, +0.16em. Section headings (h2). The same style as the site name, which is `name` |
+| label | 14/20 | 500 | capitals via `text-transform`, +0.16em. Section headings (h2) on About and the series "Next" cell; not on Projects. The same style as the site name, which is `name` |
 | name | 14/20 | 500 | capitals, +0.16em |
 | ui | 14/20 | 400 | nav, Previous, Pause, Next, Close |
 | caption | 12/16 | 400 | grey, tabular figures |
@@ -121,7 +123,7 @@ Header on every page: name (home link) at the left; Projects, About, Contact at 
 Footer on every page except Home: "© 2026 Penko Skumov" left, "Web design Dimitar Slavchev" right (stacked on phone); year generated at build.
 
 - **Home** (D5-Home, D5-Home-1/2/Q, D5-Home-Rules; D5-Phone-Home*; unchanged from Designs 4): slideshow, see below. The Home has no visible heading; keep a visually hidden h1.
-- **Projects** (D5-Projects; D5-Phone-Projects): h1 "Projects" (Display) at the left. One list on the axis: year (caption) in a 115 px column at column 5, title (28/32) at column 6, rows 48 apart, the first title's cap-top level with the h1's (64). "Archive" is a Label on the left margin at the cap-top of its first title, its list on the same axis, 96 under the last project baseline. A 440 x 292 slot in columns 9-12, top 64, shows the opening frame of the series under the pointer (first row by default; off on touch; Archive rows have none yet). Phone: Display title, the list (title with the year under it, 60 apart), the Archive label, its list.
+- **Projects** (D4-Projects; D4-Phone-Projects: Designs 4 layout, kept on purpose, the Designs 5 version was dropped): Projects list (8) in columns 1-4, Archive (4) in 5-8, a 440 x 292 slot in 9-12 showing the opening frame of the series under the pointer (first row by default; off on touch). The words "Projects" and "Archive" are 12/16 grey captions, not Display or Label. Phone: two lists in one column.
 - **Series** (D5-Series-Days, D5-Series-Vertical; D5-Phone-Series): h1 (Display) and years (caption) at the left; one text column on the axis, 440 wide, its first line level with the h1 cap-top: the epigraph (grey, 18/28), its source (caption, 28 under), the statement (paragraphs 28 apart, 56 under the source); no text for Vertical Summer. Frames start 80 under the end of the text; then bare frames (no numbers, no captions) in 3 columns (440 x 292) for landscape series or 4 columns (325 x 488) for portrait series, 20 px apart. The last cell is the way on: a Label "Next", the next series title (28/32) and years, and "Back to Projects" on the cell's bottom edge. Phone: one column, 350 wide, frames 12 apart. Other series follow these two; non-3:2 series keep their own ratio, uncropped.
 - **Viewer** (D5-Viewer-1/2; D5-Phone-Viewer-1/2): white. Photograph fits 100vw minus margins by 100svh minus 144 at natural proportions. Top row: counter ("06 / 20") left, Close right. Bottom row: caption and series link left (series link on column 3), Previous and Next right. Keys: left, right, Escape; click = next; swipe on phone. A URL per frame (Back closes). Preload neighbours. Focus to Close on open, trapped, returned on close. Page behind does not scroll. No wrap.
 - **About** (D5-About; D5-Phone-About): portrait 440 x 564 at columns 1-4, top 64. h1 "About" (Display) at column 5, cap-top 64. Biography 18/28, 440 wide, its last baseline on the foot of the portrait (y = 627). Quotation whole, 28/32 at 400, -0.01em, ink, 7 columns (785) from column 5, cap-top 144 under the portrait caption; no source (none in the data). Then three sections 112 apart (last baseline of a list to the next cap-top): Affiliations, Exhibitions and awards (27 rows), Publications (11 rows). Each is an h2 Label on the left margin with its cap-top on the cap-top of the first row, and a list on the axis: year (caption, shown once per run of the same year) in a 115 px column, entry 14/20 785 wide, rows 12 apart. No date range in the labels. Make each label sticky for the length of its list (not drawn). Phone: one column in the same order, labels above lists, the quotation 18/28 grey.
@@ -172,3 +174,13 @@ Clean URLs: `/`, `/projects/`, `/projects/<series>/`, `/projects/<series>/<n>/` 
 - Work one step at a time and show Dimitar each page against its board; do not add features, effects or components the boards do not show.
 - Pixel alignment is part of the design: text aligns by its ink (cap-top, baseline, side bearing), frames sit on integer pixels. Compare with screenshots, not by eye.
 - If a rule here conflicts with a board, the board shows the intent; ask.
+
+## Change set: Designs 5 on top of an existing build (11.11.2026)
+Reference boards: page Designs 5 of the canvas. Do these in order; check each against its board at 1440 and 390.
+1. Tokens: add `display` (56/56, 400, -0.03em; XS 36/40, -0.02em) and `label` (14/20, 500, uppercase, +0.16em). `title` stays for list names only.
+2. Page titles (h1) become `display` on About, Series, Contact and 404. Projects and Home keep what they have (Projects heading stays the 12/16 grey caption).
+3. Axis: on About, Series, Contact and 404 content starts on column 5 (x = 500 at L); the left margin holds only the title, a label or the portrait.
+4. About: rebuild as D5-About (portrait, h1, bio standing on the portrait's foot, quotation 28/32, then Affiliations, Exhibitions and awards, Publications, each a `label` h2 on the left margin with its list on the axis). Labels sticky for the length of their list. XS: one column, labels above lists, quotation 18/28 grey.
+5. Series: h1 and years left; one text column on the axis (epigraph grey, source, statement); frames 80 below the text; the "Next" cell opens with a `label`.
+6. Contact: h1 at column 9 above the sentence; 404: h1 left, sentence on the axis.
+7. Do not touch Projects, Home, viewer, menu.
